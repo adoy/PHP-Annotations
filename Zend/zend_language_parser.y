@@ -1101,8 +1101,8 @@ annotations:
 ;
 
 annotation:
-		'[' T_STRING '(' annotation_values ')' ']'
-	|	'[' T_STRING ']'
+		'[' T_STRING '(' annotation_values ')' ']' { zend_do_free(&$2 TSRMLS_CC); }
+	|	'[' T_STRING ']' { zend_do_free(&$2 TSRMLS_CC); }
 ;
 
 annotation_values:
@@ -1118,11 +1118,11 @@ annotation_value_list:
 ;
 
 annotation_value:
-		T_STRING '=' annotation_plain_value
+		T_STRING '=' annotation_plain_value { zend_do_free(&$1 TSRMLS_CC); }
 ;
 
 annotation_plain_value:
-		static_scalar
+		static_scalar { zend_do_free(&$1 TSRMLS_CC); }
 	| 	annotation
 	|   annotation_array 
 ;
@@ -1133,9 +1133,9 @@ annotation_array:
 ;
 
 annotation_array_list:
-		annotation_array_list ',' static_scalar T_DOUBLE_ARROW annotation_plain_value
-	|	annotation_array_list ',' annotation_plain_value
-	| 	static_scalar T_DOUBLE_ARROW annotation_plain_value
+		annotation_array_list ',' static_scalar T_DOUBLE_ARROW annotation_plain_value { zend_do_free(&$3 TSRMLS_CC); }
+	|	annotation_array_list ',' annotation_plain_value 
+	| 	static_scalar T_DOUBLE_ARROW annotation_plain_value { zend_do_free(&$1 TSRMLS_CC); }
 	| 	annotation_plain_value
 ;
 
