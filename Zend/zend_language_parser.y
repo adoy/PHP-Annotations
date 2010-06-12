@@ -321,8 +321,8 @@ unticked_function_declaration_statement:
 ;
 
 unticked_class_declaration_statement:
-		class_entry_type T_STRING extends_from
-			{ zend_do_begin_class_declaration(&$1, &$2, &$3 TSRMLS_CC); }
+		annotations class_entry_type T_STRING extends_from
+			{ zend_do_begin_class_declaration(&$2, &$3, &$4 TSRMLS_CC); }
 			implements_list
 			'{'
 				class_statement_list
@@ -1093,6 +1093,50 @@ isset_variables:
 class_constant:
 		class_name T_PAAMAYIM_NEKUDOTAYIM T_STRING { zend_do_fetch_constant(&$$, &$1, &$3, ZEND_RT, 0 TSRMLS_CC); }
 	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM T_STRING { zend_do_fetch_constant(&$$, &$1, &$3, ZEND_RT, 0 TSRMLS_CC); }
+;
+
+annotations:
+		annotations annotation
+	|	/* empty */
+;
+
+annotation:
+		'[' T_STRING '(' annotation_values ')' ']'
+	|	'[' T_STRING ']'
+;
+
+annotation_values:
+		annotation_plain_value /* DEFAULT VAL */ ',' annotation_value_list
+	|	annotation_plain_value /* DEFAULT VAL */
+	|	annotation_value_list
+	|   /* empty */
+;
+
+annotation_value_list:
+		annotation_value_list ',' annotation_value
+	|   annotation_value
+;
+
+annotation_value:
+		T_STRING '=' annotation_plain_value
+;
+
+annotation_plain_value:
+		static_scalar
+	| 	annotation
+	|   annotation_array 
+;
+
+annotation_array:
+		'{' annotation_array_list '}'
+	| 	'{' '}' /* empty array */
+;
+
+annotation_array_list:
+		annotation_array_list ',' static_scalar T_DOUBLE_ARROW annotation_plain_value
+	|	annotation_array_list ',' annotation_plain_value
+	| 	static_scalar T_DOUBLE_ARROW annotation_plain_value
+	| 	annotation_plain_value
 ;
 
 %%
