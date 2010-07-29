@@ -178,7 +178,7 @@ namespace_name:
 top_statement:
 		statement						{ zend_verify_namespace(TSRMLS_C); }
 	|	function_declaration_statement	{ zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
-	|	class_declaration_statement		{ zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
+	|	annotations class_declaration_statement		{ zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
 	|	T_HALT_COMPILER '(' ')' ';'		{ zend_do_halt_compiler_register(TSRMLS_C); YYACCEPT; }
 	|	T_NAMESPACE namespace_name ';'	{ zend_do_begin_namespace(&$2, 0 TSRMLS_CC); }
 	|	T_NAMESPACE namespace_name '{'	{ zend_do_begin_namespace(&$2, 1 TSRMLS_CC); }
@@ -321,8 +321,8 @@ unticked_function_declaration_statement:
 ;
 
 unticked_class_declaration_statement:
-		annotations class_entry_type T_STRING extends_from
-			{ zend_do_begin_class_declaration(&$2, &$3, &$4 TSRMLS_CC); }
+		class_entry_type T_STRING extends_from
+			{ zend_do_begin_class_declaration(&$1, &$2, &$3 TSRMLS_CC); }
 			implements_list
 			'{'
 				class_statement_list
@@ -531,11 +531,11 @@ class_statement_list:
 
 
 class_statement:
-		variable_modifiers { CG(access_type) = Z_LVAL($1.u.constant); } class_variable_declaration ';'
+		annotations variable_modifiers { CG(access_type) = Z_LVAL($2.u.constant); } class_variable_declaration ';'
 	|	class_constant_declaration ';'
 	|	trait_use_statement
-	|	method_modifiers function is_reference T_STRING { zend_do_begin_function_declaration(&$2, &$4, 1, $3.op_type, &$1 TSRMLS_CC); } '('
-			parameter_list ')' method_body { zend_do_abstract_method(&$4, &$1, &$9 TSRMLS_CC); zend_do_end_function_declaration(&$2 TSRMLS_CC); }
+	|	annotations method_modifiers function is_reference T_STRING { zend_do_begin_function_declaration(&$3, &$5, 1, $4.op_type, &$2 TSRMLS_CC); } '('
+			parameter_list ')' method_body { zend_do_abstract_method(&$5, &$2, &$10 TSRMLS_CC); zend_do_end_function_declaration(&$3 TSRMLS_CC); }
 ;
 
 trait_use_statement:
