@@ -47,7 +47,7 @@
 %}
 
 %pure_parser
-%expect 2
+%expect 2 
 
 %left T_INCLUDE T_INCLUDE_ONCE T_EVAL T_REQUIRE T_REQUIRE_ONCE
 %left ','
@@ -178,7 +178,7 @@ namespace_name:
 top_statement:
 		statement						{ zend_verify_namespace(TSRMLS_C); }
 	|	function_declaration_statement	{ zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
-	|	annotations class_declaration_statement		{ zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
+	|	class_declaration_statement		{ zend_verify_namespace(TSRMLS_C); zend_do_early_binding(TSRMLS_C); }
 	|	T_HALT_COMPILER '(' ')' ';'		{ zend_do_halt_compiler_register(TSRMLS_C); YYACCEPT; }
 	|	T_NAMESPACE namespace_name ';'	{ zend_do_begin_namespace(&$2, 0 TSRMLS_CC); }
 	|	T_NAMESPACE namespace_name '{'	{ zend_do_begin_namespace(&$2, 1 TSRMLS_CC); }
@@ -321,12 +321,12 @@ unticked_function_declaration_statement:
 ;
 
 unticked_class_declaration_statement:
-		class_entry_type T_STRING extends_from
-			{ zend_do_begin_class_declaration(&$1, &$2, &$3 TSRMLS_CC); }
+		annotations class_entry_type T_STRING extends_from
+			{ zend_do_begin_class_declaration(&$2, &$3, &$4 TSRMLS_CC); }
 			implements_list
 			'{'
 				class_statement_list
-			'}' { zend_do_end_class_declaration(&$1, &$2 TSRMLS_CC); }
+			'}' { zend_do_end_class_declaration(&$2, &$3 TSRMLS_CC); }
 	|	interface_entry T_STRING
 			{ zend_do_begin_class_declaration(&$1, &$2, NULL TSRMLS_CC); }
 			interface_extends_list
