@@ -1095,19 +1095,25 @@ class_constant:
 	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM T_STRING { zend_do_fetch_constant(&$$, &$1, &$3, ZEND_RT, 0 TSRMLS_CC); }
 ;
 
+
 annotations:
-		annotations annotation
+		non_empty_annotations 
 	|	/* empty */
 ;
 
+non_empty_annotations:
+		non_empty_annotations annotation { /* TODO: Add annotation $2 to $$ */ }
+	|	annotation { /* TODO: Init annotation struct and add $1 */ }
+;
+
 annotation:
-		'[' T_STRING '(' annotation_values ')' ']' { zend_do_free(&$2 TSRMLS_CC); }
-	|	'[' T_STRING ']' { zend_do_free(&$2 TSRMLS_CC); }
+		'[' T_STRING '(' annotation_values ')' ']' { /* TODO: Add $2 with $4 as value */ zend_do_free(&$2); }
+	|	'[' T_STRING ']' { /* TODO: Add $2 with no value */ zend_do_free(&$2); }
 ;
 
 annotation_values:
-		annotation_plain_value /* DEFAULT VAL */ ',' annotation_value_list
-	|	annotation_plain_value /* DEFAULT VAL */
+		annotation_plain_value { /* TODO: Add value with default name */ } ',' annotation_value_list
+	|	annotation_plain_value { /* TODO: Add value with default name */ } 
 	|	annotation_value_list
 	|   /* empty */
 ;
@@ -1118,7 +1124,7 @@ annotation_value_list:
 ;
 
 annotation_value:
-		T_STRING '=' annotation_plain_value { zend_do_free(&$1 TSRMLS_CC); }
+		T_STRING '=' annotation_plain_value { /* VALUE */ zend_do_free(&$1); }
 ;
 
 annotation_plain_value:
