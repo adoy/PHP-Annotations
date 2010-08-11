@@ -318,6 +318,8 @@ is_reference:
 unticked_function_declaration_statement:
 		function is_reference T_STRING { zend_do_begin_function_declaration(&$1, &$3, 0, $2.op_type, NULL TSRMLS_CC); }
 			'(' parameter_list ')' '{' inner_statement_list '}' { zend_do_end_function_declaration(&$1 TSRMLS_CC); }
+	|	non_empty_annotations function is_reference T_STRING { zend_do_begin_function_declaration(&$2, &$4, 0, $1.op_type, NULL TSRMLS_CC); }
+			'(' parameter_list ')' '{' inner_statement_list '}' { zend_do_end_function_declaration(&$2 TSRMLS_CC); }
 ;
 
 unticked_class_declaration_statement:
