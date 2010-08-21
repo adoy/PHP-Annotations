@@ -21,6 +21,8 @@
 #ifndef ZEND_ANNOTATIONS_H
 #define ZEND_ANNOTATIONS_H
 
+BEGIN_EXTERN_C()
+
 #define ZEND_ANNOTATION_ZVAL 1
 #define ZEND_ANNOTATION_ANNO 2
 #define ZEND_ANNOTATION_HASH 3
@@ -28,8 +30,16 @@
 void zend_annotation_value_dtor(void **ptr);
 void zend_annotation_dtor(void **ptr);
 
-#endif
+void zend_register_annotation_ce(TSRMLS_D);
 
+ZEND_API void zend_create_annotation(zval *res, zend_annotation *annotation TSRMLS_DC);
+ZEND_API void zend_create_all_annotations(zval *return_value, HashTable *annotations TSRMLS_DC); 
+
+
+
+END_EXTERN_C()
+
+#endif
 /*
  * Local variables:
  * tab-width: 4

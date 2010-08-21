@@ -40,6 +40,7 @@
 #include "zend_interfaces.h"
 #include "zend_closures.h"
 #include "zend_extensions.h"
+#include "zend_annotations.h"
 
 #define reflection_update_property(object, name, value) do { \
 		zval *member; \
@@ -1787,6 +1788,71 @@ ZEND_METHOD(reflection_function, getDocComment)
 		RETURN_STRINGL(fptr->op_array.doc_comment, fptr->op_array.doc_comment_len, 1);
 	}
 	RETURN_FALSE;
+}
+/* }}} */
+
+/** {{{ proto public array ReflectionFunction::getAnnotations() 
+	Returns all annotations for this function (or an empty array if the function has no annotation). */
+ZEND_METHOD(reflection_function, getAnnotations)
+{
+	reflection_object *intern;
+	zend_function *fptr;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(fptr);
+	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.annotations) {
+		zend_create_all_annotations(return_value, fptr->op_array.annotations TSRMLS_CC);
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto public Annotation ReflectionFunction::getAnnotation(string name) 
+   Return the annotation of the specified type if present, else null */
+ZEND_METHOD(reflection_function, getAnnotation)
+{
+	reflection_object *intern;
+	zend_function *fptr;
+	zend_annotation **annotation;
+	char *name = NULL;
+	int name_length = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_length) == FAILURE) {
+		return;                         
+	}                                       
+	GET_REFLECTION_OBJECT_PTR(fptr);
+	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.annotations
+			&& zend_hash_find(fptr->op_array.annotations, name, name_length +1, (void **) &annotation) == SUCCESS) {
+		zend_create_annotation(return_value, *annotation TSRMLS_CC);
+	} else {     
+		RETURN_FALSE;
+	}   
+
+}
+/* }}} */
+
+/* {{{ proto public boolean ReflectionFunction::isAnnotationPresent(string name) 
+   Return true if the annotation of the specified type is present, else false */
+ZEND_METHOD(reflection_function, isAnnotationPresent)
+{
+	reflection_object *intern;
+	zend_function *fptr;
+	char *name = NULL;
+	int name_length = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_length) == FAILURE) {
+		return;
+	}   
+	GET_REFLECTION_OBJECT_PTR(fptr);
+	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.annotations 
+			&& zend_symtable_exists(fptr->op_array.annotations, name, name_length + 1)) {
+		RETURN_TRUE;        
+	} else {                            
+		RETURN_FALSE;
+	}   
 }
 /* }}} */
 
@@ -3552,6 +3618,70 @@ ZEND_METHOD(reflection_class, getDocComment)
 }
 /* }}} */
 
+/** {{{ proto public array ReflectionClass::getAnnotations() 
+    Returns all annotations for this class (or an empty array if the class has no annotation). */
+ZEND_METHOD(reflection_class, getAnnotations)
+{
+	reflection_object *intern;
+	zend_class_entry *ce;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(ce);
+	if (ce->type == ZEND_USER_CLASS && ce->annotations) {
+		zend_create_all_annotations(return_value, ce->annotations TSRMLS_CC);
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto public Annotation ReflectionClass::getAnnotation(string name) 
+   Return the annotation of the specified type if present, else null */
+ZEND_METHOD(reflection_class, getAnnotation)
+{
+	reflection_object *intern;
+	zend_class_entry *ce;
+	zend_annotation **annotation;
+	char *name = NULL;
+	int name_length = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_length) == FAILURE) {
+		return;
+	}   
+	GET_REFLECTION_OBJECT_PTR(ce);
+	if (ce->type == ZEND_USER_CLASS && ce->annotations
+			&& zend_hash_find(ce->annotations, name, name_length +1, (void **) &annotation) == SUCCESS) {
+		zend_create_annotation(return_value, *annotation TSRMLS_CC);
+	} else {     
+		RETURN_FALSE;
+	}   
+}
+/* }}} */
+
+/* {{{ proto public boolean ReflectionClass::isAnnotationPresent(string name) 
+   Return true if the annotation of the specified type is present, else false */
+ZEND_METHOD(reflection_class, isAnnotationPresent)
+{
+	reflection_object *intern;
+	zend_class_entry *ce;
+	char *name = NULL;
+	int name_length = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_length) == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(ce);
+	if (ce->type == ZEND_USER_CLASS && ce->annotations
+			&& zend_symtable_exists(ce->annotations, name, name_length + 1)) {
+		RETURN_TRUE;
+	} else {     
+		RETURN_FALSE;
+	}  
+}
+/* }}} */
+
 /* {{{ proto public ReflectionMethod ReflectionClass::getConstructor()
    Returns the class' constructor if there is one, NULL otherwise */
 ZEND_METHOD(reflection_class, getConstructor)
@@ -4990,6 +5120,68 @@ ZEND_METHOD(reflection_property, getDocComment)
 }
 /* }}} */
 
+/** {{{ proto public array ReflectionProperty::getAnnotations() 
+    Returns all annotations for this property (or an empty array if the property has no annotation). */
+ZEND_METHOD(reflection_property, getAnnotations)
+{
+	reflection_object *intern;
+	property_reference *ref;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(ref);
+	if (ref->prop.annotations) {
+		zend_create_all_annotations(return_value, ref->prop.annotations TSRMLS_CC);
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
+/* {{{ proto public Annotation ReflectionProperty::getAnnotation(string name) 
+   Return the annotation of the specified type if present, else null */
+ZEND_METHOD(reflection_property, getAnnotation)
+{
+	reflection_object *intern;
+	property_reference *ref;
+	zend_annotation **annotation;
+	char *name = NULL;
+	int name_length = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_length) == FAILURE) {
+		return;                     
+	}                                   
+	GET_REFLECTION_OBJECT_PTR(ref);
+	if (ref->prop.annotations && zend_hash_find(ref->prop.annotations, name, name_length +1, (void **) &annotation) == SUCCESS) {
+		zend_create_annotation(return_value, *annotation TSRMLS_CC);
+	} else {     
+		RETURN_FALSE;
+	}   
+}
+/* }}} */
+
+/* {{{ proto public boolean ReflectionProperty::isAnnotationPresent(string name) 
+   Return true if the annotation of the specified type is present, else false */
+ZEND_METHOD(reflection_property, isAnnotationPresent)
+{
+	reflection_object *intern;
+	property_reference *ref;
+	char *name = NULL;
+	int name_length = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_length) == FAILURE) {
+		return;
+	} 
+	GET_REFLECTION_OBJECT_PTR(ref);
+	if (ref->prop.annotations && zend_symtable_exists(ref->prop.annotations, name, name_length + 1)) {
+		RETURN_TRUE;
+	} else {
+		RETURN_FALSE;
+	}
+}
+/* }}} */
+
 /* {{{ proto public int ReflectionProperty::setAccessible(bool visible)
    Sets whether non-public properties can be requested */
 ZEND_METHOD(reflection_property, setAccessible)
@@ -5557,6 +5749,10 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection_function_invokeArgs, 0)
 	ZEND_ARG_ARRAY_INFO(0, args, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_reflection_function_getAnnotation, 0)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
 static const zend_function_entry reflection_function_abstract_functions[] = {
 	ZEND_ME(reflection, __clone, arginfo_reflection__void, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	PHP_ABSTRACT_ME(reflection_function, __toString, arginfo_reflection__void)
@@ -5567,6 +5763,9 @@ static const zend_function_entry reflection_function_abstract_functions[] = {
 	ZEND_ME(reflection_function, isUserDefined, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getClosureThis, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getDocComment, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_function, getAnnotations, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_function, getAnnotation, arginfo_reflection_function_getAnnotation, 0)
+	ZEND_ME(reflection_function, isAnnotationPresent, arginfo_reflection_function_getAnnotation, 0)
 	ZEND_ME(reflection_function, getEndLine, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getExtension, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getExtensionName, arginfo_reflection__void, 0)
@@ -5717,6 +5916,10 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_implementsInterface, 0)
 	ZEND_ARG_INFO(0, interface)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_reflection_class_getAnnotation, 0)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
 static const zend_function_entry reflection_class_functions[] = {
 	ZEND_ME(reflection, __clone, arginfo_reflection__void, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	ZEND_ME(reflection_class, export, arginfo_reflection_class_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
@@ -5731,6 +5934,9 @@ static const zend_function_entry reflection_class_functions[] = {
 	ZEND_ME(reflection_class, getStartLine, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, getEndLine, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, getDocComment, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_class, getAnnotations, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_class, getAnnotation, arginfo_reflection_class_getAnnotation, 0)
+	ZEND_ME(reflection_class, isAnnotationPresent, arginfo_reflection_class_getAnnotation, 0)
 	ZEND_ME(reflection_class, getConstructor, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, hasMethod, arginfo_reflection_class_hasMethod, 0)
 	ZEND_ME(reflection_class, getMethod, arginfo_reflection_class_getMethod, 0)
@@ -5811,6 +6017,10 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection_property_setAccessible, 0)
 	ZEND_ARG_INFO(0, visible)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_reflection_property_getAnnotation, 0)
+	ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
 static const zend_function_entry reflection_property_functions[] = {
 	ZEND_ME(reflection, __clone, arginfo_reflection__void, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	ZEND_ME(reflection_property, export, arginfo_reflection_property_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
@@ -5827,6 +6037,9 @@ static const zend_function_entry reflection_property_functions[] = {
 	ZEND_ME(reflection_property, getModifiers, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_property, getDeclaringClass, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_property, getDocComment, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_property, getAnnotations, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_property, getAnnotation, arginfo_reflection_property_getAnnotation, 0)
+	ZEND_ME(reflection_property, isAnnotationPresent, arginfo_reflection_property_getAnnotation, 0)
 	ZEND_ME(reflection_property, setAccessible, arginfo_reflection_property_setAccessible, 0)
 	{NULL, NULL, NULL}
 };
