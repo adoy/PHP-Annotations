@@ -271,6 +271,10 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 			if (ce->doc_comment) {
 				efree(ce->doc_comment);
 			}
+			if (ce->annotations) {
+				zend_hash_destroy(ce->annotations);
+				efree(ce->annotations);
+			}
 			
 			_destroy_zend_class_traits_info(ce);
 			
@@ -304,6 +308,10 @@ ZEND_API void destroy_zend_class(zend_class_entry **pce)
 			}
 			if (ce->doc_comment) {
 				free(ce->doc_comment);
+			}
+			if (ce->annotations) {
+				zend_hash_destroy(ce->annotations);
+				efree(ce->annotations);
 			}
 			free(ce);
 			break;
@@ -360,6 +368,10 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 	}
 	if (op_array->doc_comment) {
 		efree(op_array->doc_comment);
+	}
+	if (op_array->annotations) {
+		zend_hash_destroy(op_array->annotations);
+		efree(op_array->annotations);
 	}
 	if (op_array->brk_cont_array) {
 		efree(op_array->brk_cont_array);
