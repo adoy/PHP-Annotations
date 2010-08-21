@@ -213,7 +213,7 @@ static const zend_function_entry annotation_functions[] = {
 void zend_register_annotation_ce(TSRMLS_D) /* {{{ */
 {
 	zend_class_entry ce;
-	INIT_CLASS_ENTRY(ce, "Annotation", annotation_functions);
+	INIT_CLASS_ENTRY(ce, "ReflectionAnnotation", annotation_functions);
 	zend_ce_annotation = zend_register_internal_class(&ce TSRMLS_CC);
 	zend_ce_annotation->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
 	zend_declare_property_null(zend_ce_annotation, "value", sizeof("value")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
