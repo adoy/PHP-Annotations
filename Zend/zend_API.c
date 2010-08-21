@@ -3089,7 +3089,7 @@ ZEND_API const char *zend_get_module_version(const char *module_name) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int zend_declare_property_ex(zend_class_entry *ce, const char *name, int name_length, zval *property, int access_type, char *doc_comment, int doc_comment_len TSRMLS_DC) /* {{{ */
+ZEND_API int zend_declare_property_ex(zend_class_entry *ce, const char *name, int name_length, zval *property, int access_type, char *doc_comment, int doc_comment_len, HashTable *annotations TSRMLS_DC) /* {{{ */
 {
 	zend_property_info property_info, *property_info_ptr;
 	char *interned_name;
@@ -3181,6 +3181,8 @@ ZEND_API int zend_declare_property_ex(zend_class_entry *ce, const char *name, in
 	property_info.doc_comment = doc_comment;
 	property_info.doc_comment_len = doc_comment_len;
 
+	property_info.annotations = annotations;
+
 	property_info.ce = ce;
 
 	zend_hash_quick_update(&ce->properties_info, name, name_length + 1, h, &property_info, sizeof(zend_property_info), NULL);
@@ -3191,7 +3193,7 @@ ZEND_API int zend_declare_property_ex(zend_class_entry *ce, const char *name, in
 
 ZEND_API int zend_declare_property(zend_class_entry *ce, char *name, int name_length, zval *property, int access_type TSRMLS_DC) /* {{{ */
 {
-	return zend_declare_property_ex(ce, name, name_length, property, access_type, NULL, 0 TSRMLS_CC);
+	return zend_declare_property_ex(ce, name, name_length, property, access_type, NULL, 0, NULL TSRMLS_CC);
 }
 /* }}} */
 

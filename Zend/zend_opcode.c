@@ -78,6 +78,8 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->doc_comment = NULL;
 	op_array->doc_comment_len = 0;
 
+	op_array->annotations = NULL;
+
 	op_array->arg_info = NULL;
 	op_array->num_args = 0;
 	op_array->required_num_args = 0;

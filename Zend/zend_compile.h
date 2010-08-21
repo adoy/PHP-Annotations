@@ -188,6 +188,7 @@ typedef struct _zend_property_info {
 	char *doc_comment;
 	int doc_comment_len;
 	zend_class_entry *ce;
+	HashTable *annotations;
 } zend_property_info;
 
 
@@ -256,6 +257,8 @@ struct _zend_op_array {
 	char *doc_comment;
 	zend_uint doc_comment_len;
 	zend_uint early_binding; /* the linked list of delayed declarations */
+
+	HashTable *annotations;
 
 	zend_literal *literals;
 	int last_literal, size_literal;

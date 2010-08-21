@@ -125,6 +125,10 @@ static void zend_destroy_property_info(zend_property_info *property_info) /* {{{
 	if (property_info->doc_comment) {
 		efree(property_info->doc_comment);
 	}
+	if (property_info->annotations) {
+		zend_hash_destroy(property_info->annotations);
+		efree(property_info->annotations);
+	}
 }
 /* }}} */
 
@@ -1722,6 +1726,11 @@ void zend_do_begin_function_declaration(znode *function_token, znode *function_n
 		CG(active_op_array)->doc_comment_len = CG(doc_comment_len);
 		CG(doc_comment) = NULL;
 		CG(doc_comment_len) = 0;
+	}
+
+	if (CG(annotations)) {
+		CG(active_op_array)->annotations = CG(annotations);
+		CG(annotations) = NULL;
 	}
 
 	zend_stack_push(&CG(labels_stack), (void *) &CG(labels), sizeof(HashTable*));
@@ -3543,6 +3552,8 @@ static void zend_traits_duplicate_function(zend_function *fe, char *newname)
 	}
 
 	fe->op_array.doc_comment = estrndup(fe->op_array.doc_comment, fe->op_array.doc_comment_len);
+	/* TODO ADOY: Make a copy of the annotation */
+
 	fe->op_array.try_catch_array = (zend_try_catch_element*)estrndup((char*)fe->op_array.try_catch_array, sizeof(zend_try_catch_element) * fe->op_array.last_try_catch);
 
 	fe->op_array.brk_cont_array = (zend_brk_cont_element*)estrndup((char*)fe->op_array.brk_cont_array, sizeof(zend_brk_cont_element) * fe->op_array.last_brk_cont);
@@ -4552,6 +4563,11 @@ void zend_do_begin_class_declaration(const znode *class_token, znode *class_name
 		CG(doc_comment) = NULL;
 		CG(doc_comment_len) = 0;
 	}
+
+	if (CG(annotations)) {
+		CG(active_class_entry)->annotations = CG(annotations);
+		CG(annotations) = NULL;
+	}
 }
 /* }}} */
 
@@ -4742,6 +4758,7 @@ void zend_do_declare_property(const znode *var_name, const znode *value, zend_ui
 	zend_property_info *existing_property_info;
 	char *comment = NULL;
 	int comment_len = 0;
+	HashTable *annotations = NULL;
 
 	if (CG(active_class_entry)->ce_flags & ZEND_ACC_INTERFACE) {
 		zend_error(E_COMPILE_ERROR, "Interfaces may not include member variables");
@@ -4775,7 +4792,13 @@ void zend_do_declare_property(const znode *var_name, const znode *value, zend_ui
 		CG(doc_comment_len) = 0;
 	}
 
-	zend_declare_property_ex(CG(active_class_entry), zend_new_interned_string(var_name->u.constant.value.str.val, var_name->u.constant.value.str.len + 1, 0 TSRMLS_CC), var_name->u.constant.value.str.len, property, access_type, comment, comment_len TSRMLS_CC);
+	if (CG(annotations)) {
+		annotations = CG(annotations);
+		CG(annotations) = NULL;
+	}
+
+
+	zend_declare_property_ex(CG(active_class_entry), zend_new_interned_string(var_name->u.constant.value.str.val, var_name->u.constant.value.str.len + 1, 0 TSRMLS_CC), var_name->u.constant.value.str.len, property, access_type, comment, comment_len, annotations TSRMLS_CC);
 	efree(var_name->u.constant.value.str.val);
 }
 /* }}} */
@@ -6151,6 +6174,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 
 	ce->doc_comment = NULL;
 	ce->doc_comment_len = 0;
+	ce->annotations = NULL;
 
 	ce->default_properties_table = NULL;
 	ce->default_static_members_table = NULL;

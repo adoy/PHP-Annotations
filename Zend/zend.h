@@ -535,6 +535,8 @@ struct _zend_class_entry {
 	char *doc_comment;
 	zend_uint doc_comment_len;
 
+	HashTable *annotations;
+
 	struct _zend_module_entry *module;
 };
 
