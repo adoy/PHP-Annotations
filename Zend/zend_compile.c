@@ -26,6 +26,7 @@
 #include "zend_llist.h"
 #include "zend_API.h"
 #include "zend_exceptions.h"
+#include "zend_annotations.h"
 #include "tsrm_virtual_cwd.h"
 
 #ifdef ZEND_MULTIBYTE
@@ -6704,32 +6705,6 @@ void zend_do_annotation_annotation_value(TSRMLS_D) /* {{{ */
 	zend_stack_push(&CG(annotation_stack), (void *) &av, sizeof(zend_annotation_value *));
 }
 /* }}} */
-
-/* TODO ADOY : CHANGE THIS */
-void zend_annotation_value_dtor(void **ptr) {
-	zend_annotation_value *value = (zend_annotation_value *) *ptr;
-	if (value->type == ZEND_ANNOTATION_ZVAL) {
-		zval_dtor(value->value.zval);
-		efree(value->value.zval);
-	} else if (value->type == ZEND_ANNOTATION_HASH) {
-		zend_hash_destroy(value->value.ht);
-		efree(value->value.ht);
-	} else if (value->type == ZEND_ANNOTATION_ANNO) {
-		zend_annotation **a = &value->value.annotation;
-		zend_annotation_dtor((void *) a);
-	}
-	efree(*ptr);
-}
-void zend_annotation_dtor(void **ptr) {
-	zend_annotation *a = (zend_annotation *) *ptr;
-	efree(a->annotation_name);
-	if (a->values) {
-		zend_hash_destroy(a->values);
-		efree(a->values);
-	}
-	efree(*ptr);
-}
-/* TODO ADOY : END OF CHANGE THIS*/
 
 /*
  * Local variables:

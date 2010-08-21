@@ -604,14 +604,6 @@ void zend_do_scalar_annotation_value(znode *value TSRMLS_DC);
 void zend_do_array_annotation_value(TSRMLS_D);
 void zend_do_annotation_annotation_value(TSRMLS_D);
 
-/* ADOY TODO : TODO MOVE */
-#define ZEND_ANNOTATION_ZVAL 1
-#define ZEND_ANNOTATION_ANNO 2
-#define ZEND_ANNOTATION_HASH 3
-void zend_annotation_value_dtor(void **ptr);
-void zend_annotation_dtor(void **ptr);
-/* ADOY TODO : END OF TODO */
-
 ZEND_API void function_add_ref(zend_function *function);
 
 #define INITIAL_OP_ARRAY_SIZE 64
