@@ -28,6 +28,7 @@
 #define ZEND_ANNOTATION_PRINT_NAME "Annotation object"
 
 ZEND_API zend_class_entry *zend_ce_annotation;
+static zend_object_handlers annotation_handlers;
 
 void zend_annotation_value_dtor(void **ptr) { /* {{{ */
     zend_annotation_value *value = (zend_annotation_value *) *ptr;
@@ -200,6 +201,29 @@ ZEND_METHOD(Annotation, __construct)
 }
 /* }}} */
 
+static void zend_annotation_free_storage(annotation_object_t *intern TSRMLS_DC) /* {{{ */
+{
+	zend_object_std_dtor(&intern->std TSRMLS_CC);
+	efree(intern);
+}
+/* }}} */
+
+static zend_object_value zend_annotation_new(zend_class_entry *class_type TSRMLS_DC) /* {{{ */
+{
+	zend_object_value object;
+	annotation_object_t *intern;
+
+	intern = (annotation_object_t *) ecalloc(1, sizeof(annotation_object_t));
+
+	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
+	object_properties_init(&intern->std, class_type);
+
+	object.handle = zend_objects_store_put(intern, (zend_objects_store_dtor_t)zend_objects_destroy_object, (zend_objects_free_object_storage_t) zend_annotation_free_storage, NULL TSRMLS_CC);
+	object.handlers = &annotation_handlers;
+	return object;
+}
+/* }}} */
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_annotation__construct, 0, 0, 0)
 	ZEND_ARG_ARRAY_INFO(0, data, 0)
 ZEND_END_ARG_INFO()
@@ -209,6 +233,17 @@ static const zend_function_entry annotation_functions[] = {
     {NULL, NULL, NULL}
 };
 
+static zval *zend_annotation_read_property(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC) /* {{{ */
+{
+	// TODO ADOY
+}   
+/* }}} */
+    
+static void zend_annotation_write_property(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC) /* {{{ */
+{
+	// TODO ADOY
+}
+/* }}} */
 
 void zend_register_annotation_ce(TSRMLS_D) /* {{{ */
 {
@@ -216,6 +251,12 @@ void zend_register_annotation_ce(TSRMLS_D) /* {{{ */
 	INIT_CLASS_ENTRY(ce, "ReflectionAnnotation", annotation_functions);
 	zend_ce_annotation = zend_register_internal_class(&ce TSRMLS_CC);
 	zend_ce_annotation->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
+	zend_ce_annotation->create_object = zend_annotation_new;
+
+	memcpy(&annotation_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+//	annotation_handlers.write_property = zend_annotation_write_property;
+//	annotation_handlers.read_property = zend_annotation_read_property;
+
 	zend_declare_property_null(zend_ce_annotation, "value", sizeof("value")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
 }
 /* }}} */

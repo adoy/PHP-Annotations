@@ -27,6 +27,10 @@ BEGIN_EXTERN_C()
 #define ZEND_ANNOTATION_ANNO 2
 #define ZEND_ANNOTATION_HASH 3
 
+typedef struct _annotation_object {
+        zend_object std;
+} annotation_object_t; 
+
 extern ZEND_API zend_class_entry *zend_ce_annotation;
 
 void zend_annotation_value_dtor(void **ptr);
