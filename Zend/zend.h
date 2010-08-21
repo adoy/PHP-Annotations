@@ -421,6 +421,24 @@ struct _zend_unserialize_data;
 typedef struct _zend_serialize_data zend_serialize_data;
 typedef struct _zend_unserialize_data zend_unserialize_data;
 
+struct _zend_annotation {
+	char *annotation_name;
+	unsigned int aname_len;
+
+	HashTable *values;
+};
+typedef struct _zend_annotation zend_annotation;
+
+struct _zend_annotation_value {
+	zend_uchar type;
+	union _zend_annotation_value_value {
+		zend_annotation *annotation;
+		zval *zval;
+		HashTable *ht;	
+	} value;
+};
+typedef struct _zend_annotation_value zend_annotation_value;
+
 struct _zend_trait_method_reference {
 	char* method_name;
 	unsigned int mname_len;

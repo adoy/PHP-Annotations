@@ -1104,18 +1104,18 @@ annotations:
 ;
 
 non_empty_annotations:
-		non_empty_annotations annotation { /* TODO: Add annotation $2 to $$ */ }
-	|	annotation { /* TODO: Init annotation struct and add $1 */ }
+		non_empty_annotations annotation { zend_do_end_annotation_declaration(TSRMLS_C); }
+	|	annotation { zend_do_end_annotation_declaration(TSRMLS_C); }
 ;
 
 annotation:
-		'[' T_STRING '(' annotation_values ')' ']' { /* TODO: Add $2 with $4 as value */ zend_do_free(&$2); }
-	|	'[' T_STRING ']' { /* TODO: Add $2 with no value */ zend_do_free(&$2); }
+		'[' T_STRING { zend_do_begin_annotation_declaration(&$1, &$2, 1 TSRMLS_CC); } '(' annotation_values ')' ']'
+	|	'[' T_STRING { zend_do_begin_annotation_declaration(&$1, &$2, 0 TSRMLS_CC); } ']'
 ;
 
 annotation_values:
-		annotation_plain_value { /* TODO: Add value with default name */ } ',' annotation_value_list
-	|	annotation_plain_value { /* TODO: Add value with default name */ } 
+		annotation_plain_value { zend_do_add_annotation_value(NULL TSRMLS_CC); } ',' annotation_value_list
+	|	annotation_plain_value { zend_do_add_annotation_value(NULL TSRMLS_CC); } 
 	|	annotation_value_list
 	|   /* empty */
 ;
@@ -1126,25 +1126,25 @@ annotation_value_list:
 ;
 
 annotation_value:
-		T_STRING '=' annotation_plain_value { /* VALUE */ zend_do_free(&$1); }
+		T_STRING '=' annotation_plain_value { zend_do_add_annotation_value(&$1 TSRMLS_CC); }
 ;
 
 annotation_plain_value:
-		static_scalar { zend_do_free(&$1 TSRMLS_CC); }
-	| 	annotation
-	|   annotation_array 
+		static_scalar { zend_do_scalar_annotation_value(&$1 TSRMLS_CC); }
+	| 	annotation { zend_do_annotation_annotation_value(TSRMLS_C); }
+	|   annotation_array { zend_do_array_annotation_value(TSRMLS_C); }
 ;
 
 annotation_array:
-		'{' annotation_array_list '}'
-	| 	'{' '}' /* empty array */
+		'{' { zend_do_init_annotation_array(TSRMLS_C); } annotation_array_list '}'
+	| 	'{' '}' { zend_do_init_annotation_array(TSRMLS_C); }
 ;
 
 annotation_array_list:
-		annotation_array_list ',' static_scalar T_DOUBLE_ARROW annotation_plain_value { zend_do_free(&$3 TSRMLS_CC); }
-	|	annotation_array_list ',' annotation_plain_value 
-	| 	static_scalar T_DOUBLE_ARROW annotation_plain_value { zend_do_free(&$1 TSRMLS_CC); }
-	| 	annotation_plain_value
+		annotation_array_list ',' static_scalar T_DOUBLE_ARROW annotation_plain_value { zend_do_add_annotation_array_element(&$3 TSRMLS_CC); }
+	|	annotation_array_list ',' annotation_plain_value { zend_do_add_annotation_array_element(NULL TSRMLS_CC); }
+	| 	static_scalar T_DOUBLE_ARROW annotation_plain_value { zend_do_add_annotation_array_element(&$1 TSRMLS_CC); }
+	| 	annotation_plain_value { zend_do_add_annotation_array_element(NULL TSRMLS_CC); }
 ;
 
 %%

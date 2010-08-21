@@ -129,6 +129,9 @@ struct _zend_compiler_globals {
 	char *doc_comment;
 	zend_uint doc_comment_len;
 
+	HashTable *annotations;
+	zend_stack annotation_stack;
+
 	zend_uint compiler_options; /* set of ZEND_COMPILE_* constants */
 
 	zval      *current_namespace;
