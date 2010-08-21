@@ -53,6 +53,7 @@ void zend_annotation_dtor(void **ptr) { /* {{{ */
     efree(*ptr);
 }
 /* }}} */
+
 static void zend_create_annotation_parameters(zval *params, HashTable *ht TSRMLS_DC) /* {{{ */
 {
 	zend_annotation_value **value_ref_ref, *value_ref;

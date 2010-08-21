@@ -33,6 +33,7 @@ ZEND_API void zend_register_default_classes(TSRMLS_D)
 	zend_register_default_exception(TSRMLS_C);
 	zend_register_iterator_wrapper(TSRMLS_C);
 	zend_register_closure_ce(TSRMLS_C);
+	zend_register_annotation_ce(TSRMLS_C);
 }
 
 /*
