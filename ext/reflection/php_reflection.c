@@ -1834,9 +1834,9 @@ ZEND_METHOD(reflection_function, getAnnotation)
 }
 /* }}} */
 
-/* {{{ proto public boolean ReflectionFunction::isAnnotationPresent(string name) 
+/* {{{ proto public boolean ReflectionFunction::hasAnnotation(string name) 
    Return true if the annotation of the specified type is present, else false */
-ZEND_METHOD(reflection_function, isAnnotationPresent)
+ZEND_METHOD(reflection_function, hasAnnotation)
 {
 	reflection_object *intern;
 	zend_function *fptr;
@@ -3660,9 +3660,9 @@ ZEND_METHOD(reflection_class, getAnnotation)
 }
 /* }}} */
 
-/* {{{ proto public boolean ReflectionClass::isAnnotationPresent(string name) 
+/* {{{ proto public boolean ReflectionClass::hasAnnotation(string name) 
    Return true if the annotation of the specified type is present, else false */
-ZEND_METHOD(reflection_class, isAnnotationPresent)
+ZEND_METHOD(reflection_class, hasAnnotation)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
@@ -5161,9 +5161,9 @@ ZEND_METHOD(reflection_property, getAnnotation)
 }
 /* }}} */
 
-/* {{{ proto public boolean ReflectionProperty::isAnnotationPresent(string name) 
+/* {{{ proto public boolean ReflectionProperty::hasAnnotation(string name) 
    Return true if the annotation of the specified type is present, else false */
-ZEND_METHOD(reflection_property, isAnnotationPresent)
+ZEND_METHOD(reflection_property, hasAnnotation)
 {
 	reflection_object *intern;
 	property_reference *ref;
@@ -5765,7 +5765,7 @@ static const zend_function_entry reflection_function_abstract_functions[] = {
 	ZEND_ME(reflection_function, getDocComment, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getAnnotations, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getAnnotation, arginfo_reflection_function_getAnnotation, 0)
-	ZEND_ME(reflection_function, isAnnotationPresent, arginfo_reflection_function_getAnnotation, 0)
+	ZEND_ME(reflection_function, hasAnnotation, arginfo_reflection_function_getAnnotation, 0)
 	ZEND_ME(reflection_function, getEndLine, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getExtension, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_function, getExtensionName, arginfo_reflection__void, 0)
@@ -5936,7 +5936,7 @@ static const zend_function_entry reflection_class_functions[] = {
 	ZEND_ME(reflection_class, getDocComment, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, getAnnotations, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, getAnnotation, arginfo_reflection_class_getAnnotation, 0)
-	ZEND_ME(reflection_class, isAnnotationPresent, arginfo_reflection_class_getAnnotation, 0)
+	ZEND_ME(reflection_class, hasAnnotation, arginfo_reflection_class_getAnnotation, 0)
 	ZEND_ME(reflection_class, getConstructor, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, hasMethod, arginfo_reflection_class_hasMethod, 0)
 	ZEND_ME(reflection_class, getMethod, arginfo_reflection_class_getMethod, 0)
@@ -6039,7 +6039,7 @@ static const zend_function_entry reflection_property_functions[] = {
 	ZEND_ME(reflection_property, getDocComment, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_property, getAnnotations, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_property, getAnnotation, arginfo_reflection_property_getAnnotation, 0)
-	ZEND_ME(reflection_property, isAnnotationPresent, arginfo_reflection_property_getAnnotation, 0)
+	ZEND_ME(reflection_property, hasAnnotation, arginfo_reflection_property_getAnnotation, 0)
 	ZEND_ME(reflection_property, setAccessible, arginfo_reflection_property_setAccessible, 0)
 	{NULL, NULL, NULL}
 };
