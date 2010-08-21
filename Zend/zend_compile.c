@@ -6682,7 +6682,7 @@ void zend_do_scalar_annotation_value(znode *value TSRMLS_DC) /* {{{ */
 
 void zend_do_array_annotation_value(TSRMLS_D) /* {{{ */
 {
-	zend_annotation **ht_ptr_ptr, *ht_ptr;
+	HashTable **ht_ptr_ptr, *ht_ptr;
 	zend_annotation_value *av = (zend_annotation_value *) emalloc(sizeof(zend_annotation_value));
 	zend_stack_top(&CG(annotation_stack), (void **) &ht_ptr_ptr);
 	ht_ptr = *ht_ptr_ptr;
