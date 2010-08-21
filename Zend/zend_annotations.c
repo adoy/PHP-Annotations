@@ -22,10 +22,12 @@
 #include "zend_API.h"
 #include "php.h"
 #include "zend_annotations.h"
+#include "zend_exceptions.h"
+
 
 #define ZEND_ANNOTATION_PRINT_NAME "Annotation object"
 
-static ZEND_API zend_class_entry *zend_ce_annotation;
+ZEND_API zend_class_entry *zend_ce_annotation;
 
 void zend_annotation_value_dtor(void **ptr) { /* {{{ */
     zend_annotation_value *value = (zend_annotation_value *) *ptr;
@@ -166,8 +168,55 @@ ZEND_API void zend_create_all_annotations(zval *res, HashTable *annotations TSRM
 }
 /* }}} */
 
+/* {{{ proto Annotation::__construct(array $data = null)
+      Constructor*/
+ZEND_METHOD(Annotation, __construct)
+{
+	HashTable *data;
+	HashPosition pos;
+	zval **value;
+	zval *object = getThis();
+    char *string_key;
+	uint str_key_len;
+	ulong num_key;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "H", &data) == FAILURE) {
+		return;
+	}
+	
+	zend_hash_internal_pointer_reset_ex(data, &pos);
+    while (zend_hash_get_current_data_ex(data, (void **)&value, &pos) == SUCCESS) {
+		switch (zend_hash_get_current_key_ex(data, &string_key, &str_key_len, &num_key, 1, &pos)) {
+			case HASH_KEY_IS_STRING:
+				zend_update_property(zend_ce_annotation, object, string_key, str_key_len, *value TSRMLS_CC);
+				efree(string_key);
+				break;
+			case HASH_KEY_IS_LONG:
+				// TODO ADOY : Trigger an error
+				break;
+		}
+		zend_hash_move_forward_ex(data, &pos);
+	}
+}
+/* }}} */
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_annotation__construct, 0, 0, 0)
+	ZEND_ARG_ARRAY_INFO(0, data, 0)
+ZEND_END_ARG_INFO()
+
+static const zend_function_entry annotation_functions[] = {
+	ZEND_ME(Annotation, __construct, arginfo_annotation__construct, ZEND_ACC_PUBLIC)
+    {NULL, NULL, NULL}
+};
+
+
 void zend_register_annotation_ce(TSRMLS_D) /* {{{ */
 {
+	zend_class_entry ce;
+	INIT_CLASS_ENTRY(ce, "Annotation", annotation_functions);
+	zend_ce_annotation = zend_register_internal_class(&ce TSRMLS_CC);
+	zend_ce_annotation->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
+	zend_declare_property_null(zend_ce_annotation, "value", sizeof("value")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
 }
 /* }}} */
 /*

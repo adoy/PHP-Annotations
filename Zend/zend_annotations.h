@@ -27,6 +27,8 @@ BEGIN_EXTERN_C()
 #define ZEND_ANNOTATION_ANNO 2
 #define ZEND_ANNOTATION_HASH 3
 
+extern ZEND_API zend_class_entry *zend_ce_annotation;
+
 void zend_annotation_value_dtor(void **ptr);
 void zend_annotation_dtor(void **ptr);
 
@@ -34,8 +36,6 @@ void zend_register_annotation_ce(TSRMLS_D);
 
 ZEND_API void zend_create_annotation(zval *res, zend_annotation *annotation TSRMLS_DC);
 ZEND_API void zend_create_all_annotations(zval *return_value, HashTable *annotations TSRMLS_DC); 
-
-
 
 END_EXTERN_C()
 
