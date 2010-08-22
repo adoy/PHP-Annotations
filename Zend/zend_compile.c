@@ -6656,7 +6656,7 @@ void zend_do_add_annotation_value(znode *value_name TSRMLS_DC) /* {{{ */
 	if (value_name) { 
 		if (zend_hash_add(annotation_ptr->values, Z_STRVAL(value_name->u.constant), Z_STRLEN(value_name->u.constant) + 1, &annotation_value_ptr, sizeof(zend_annotation_value *), NULL) == FAILURE)
 		{
-			zend_error(E_ERROR, "Failed to add value (%s). There is probably already a value with the same name", Z_STRVAL(value_name->u.constant));			
+			zend_error(E_ERROR, "Failed to add property (%s). There is probably already a property with the same name", Z_STRVAL(value_name->u.constant));			
 		}
 		zend_do_free(value_name TSRMLS_CC);
 	} else {
