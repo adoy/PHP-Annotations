@@ -189,6 +189,7 @@ typedef struct _zend_property_info {
 	int doc_comment_len;
 	zend_class_entry *ce;
 	HashTable *annotations;
+	zend_bool inherited;
 } zend_property_info;
 
 

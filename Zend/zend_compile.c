@@ -106,9 +106,7 @@ static void zend_duplicate_property_info(zend_property_info *property_info) /* {
 	if (property_info->doc_comment) {
 		property_info->doc_comment = estrndup(property_info->doc_comment, property_info->doc_comment_len);
 	}
-	if (property_info->annotations) {
-		property_info->annotations = NULL;
-	}
+	property_info->inherited = 1;
 }
 /* }}} */
 
@@ -128,7 +126,7 @@ static void zend_destroy_property_info(zend_property_info *property_info) /* {{{
 	if (property_info->doc_comment) {
 		efree(property_info->doc_comment);
 	}
-	if (property_info->annotations) {
+	if (!property_info->inherited && property_info->annotations) {
 		zend_hash_destroy(property_info->annotations);
 		efree(property_info->annotations);
 	}
