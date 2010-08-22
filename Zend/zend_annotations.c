@@ -26,6 +26,7 @@
 
 
 #define ZEND_ANNOTATION_PRINT_NAME "Annotation object"
+#define ZEND_ANNOTATION_CLASS_NAME "ReflectionAnnotation"
 
 ZEND_API zend_class_entry *zend_ce_annotation;
 static zend_object_handlers annotation_handlers;
@@ -110,6 +111,8 @@ ZEND_API void zend_create_annotation(zval *res, zend_annotation *annotation TSRM
 	ce = zend_fetch_class(annotation->annotation_name, annotation->aname_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
 	if (!ce) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not find class '%s'", annotation->annotation_name);
+	} else if (!instanceof_function(ce, zend_ce_annotation TSRMLS_CC)) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "'%s' must extends '%s'", annotation->annotation_name, ZEND_ANNOTATION_CLASS_NAME);
 	}
 	
 	object_init_ex(res, ce);
@@ -278,7 +281,7 @@ static void zend_annotation_write_property(zval *object, zval *member, zval *val
 void zend_register_annotation_ce(TSRMLS_D) /* {{{ */
 {
 	zend_class_entry ce;
-	INIT_CLASS_ENTRY(ce, "ReflectionAnnotation", annotation_functions);
+	INIT_CLASS_ENTRY(ce, ZEND_ANNOTATION_CLASS_NAME, annotation_functions);
 	zend_ce_annotation = zend_register_internal_class(&ce TSRMLS_CC);
 	zend_ce_annotation->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
 	zend_ce_annotation->create_object = zend_annotation_new;
