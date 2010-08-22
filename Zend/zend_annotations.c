@@ -235,13 +235,43 @@ static const zend_function_entry annotation_functions[] = {
 
 static zval *zend_annotation_read_property(zval *object, zval *member, int type, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
-	// TODO ADOY
+	zval *retval;
+	zend_object_handlers * std_hnd;
+	zend_class_entry *ce;
+	
+	ce = Z_OBJCE_P(object);
+	
+	if (Z_TYPE_P(member) == IS_STRING) {
+		if (zend_symtable_exists(&ce->properties_info, Z_STRVAL_P(member), Z_STRLEN_P(member) + 1)) {
+			std_hnd = zend_get_std_object_handlers();
+			retval = std_hnd->read_property(object, member, type, key TSRMLS_CC);
+		} else {
+			zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC, "Unknown property '%s' on annotation '%s'.", Z_STRVAL_P(member), ce->name);
+		}
+	} else {
+		zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC, "Unknown property on annotation '%s'.", ce->name);
+	}
+	return retval;
 }   
 /* }}} */
     
 static void zend_annotation_write_property(zval *object, zval *member, zval *value, const zend_literal *key TSRMLS_DC) /* {{{ */
 {
-	// TODO ADOY
+	zend_object_handlers *std_hnd;
+	zend_class_entry *ce;
+
+	ce = Z_OBJCE_P(object);
+
+	if (Z_TYPE_P(member) == IS_STRING) {
+		if (zend_symtable_exists(&ce->properties_info, Z_STRVAL_P(member), Z_STRLEN_P(member) + 1)) {
+			std_hnd = zend_get_std_object_handlers();
+			std_hnd->write_property(object, member, value, key TSRMLS_CC);
+		} else {
+			zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC, "Unknown property '%s' on annotation '%s'.", Z_STRVAL_P(member), ce->name);
+		}
+	} else {
+		zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC, "Unknown property on annotation '%s'.", ce->name);
+	} 
 }
 /* }}} */
 
@@ -254,8 +284,8 @@ void zend_register_annotation_ce(TSRMLS_D) /* {{{ */
 	zend_ce_annotation->create_object = zend_annotation_new;
 
 	memcpy(&annotation_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-//	annotation_handlers.write_property = zend_annotation_write_property;
-//	annotation_handlers.read_property = zend_annotation_read_property;
+	annotation_handlers.write_property = zend_annotation_write_property;
+	annotation_handlers.read_property = zend_annotation_read_property;
 
 	zend_declare_property_null(zend_ce_annotation, "value", sizeof("value")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
 }
