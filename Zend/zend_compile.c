@@ -6730,6 +6730,17 @@ void zend_do_annotation_annotation_value(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
+void zend_do_constant_annotation_value(znode *value TSRMLS_DC) /* {{{ */
+{
+	zend_do_fetch_constant(value, NULL, value, ZEND_CT, 0 TSRMLS_CC);
+	if (value->u.constant.type & IS_CONSTANT) {
+		zend_error(E_COMPILE_ERROR, "Constant is undefined");
+	} else {
+		zend_do_scalar_annotation_value(value TSRMLS_CC);
+	}
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4

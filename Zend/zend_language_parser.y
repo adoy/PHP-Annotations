@@ -1130,7 +1130,8 @@ annotation_value:
 ;
 
 annotation_plain_value:
-		static_scalar { zend_do_scalar_annotation_value(&$1 TSRMLS_CC); }
+		common_scalar { zend_do_scalar_annotation_value(&$1 TSRMLS_CC); }
+	|	T_STRING { zend_do_constant_annotation_value(&$1 TSRMLS_CC); }
 	| 	annotation { zend_do_annotation_annotation_value(TSRMLS_C); }
 	|   annotation_array { zend_do_array_annotation_value(TSRMLS_C); }
 ;
