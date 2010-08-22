@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Pierrick Charron <pierrick@php.net>                         |
+   | Author: Pierrick Charron <pierrick@php.net>                          |
    +----------------------------------------------------------------------+
 */
 
