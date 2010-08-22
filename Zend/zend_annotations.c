@@ -189,7 +189,7 @@ ZEND_METHOD(Annotation, __construct)
     while (zend_hash_get_current_data_ex(data, (void **)&value, &pos) == SUCCESS) {
 		switch (zend_hash_get_current_key_ex(data, &string_key, &str_key_len, &num_key, 1, &pos)) {
 			case HASH_KEY_IS_STRING:
-				zend_update_property(zend_ce_annotation, object, string_key, str_key_len, *value TSRMLS_CC);
+				zend_update_property(zend_ce_annotation, object, string_key, str_key_len - 1, *value TSRMLS_CC);
 				efree(string_key);
 				break;
 			case HASH_KEY_IS_LONG:
