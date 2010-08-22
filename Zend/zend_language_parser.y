@@ -1109,8 +1109,8 @@ non_empty_annotations:
 ;
 
 annotation:
-		'[' T_STRING { zend_do_begin_annotation_declaration(&$1, &$2, 1 TSRMLS_CC); } '(' annotation_values ')' ']'
-	|	'[' T_STRING { zend_do_begin_annotation_declaration(&$1, &$2, 0 TSRMLS_CC); } ']'
+		'[' class_name { zend_do_begin_annotation_declaration(&$1, &$2, 1 TSRMLS_CC); } '(' annotation_values ')' ']'
+	|	'[' class_name { zend_do_begin_annotation_declaration(&$1, &$2, 0 TSRMLS_CC); } ']'
 ;
 
 annotation_values:
