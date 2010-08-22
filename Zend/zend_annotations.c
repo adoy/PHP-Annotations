@@ -69,34 +69,36 @@ static void zend_create_annotation_parameters(zval *params, HashTable *ht TSRMLS
 
 	array_init(params);
 
-	zend_hash_internal_pointer_reset(ht);
-	while (zend_hash_get_current_data(ht, (void **) &value_ref_ref) == SUCCESS) {
-		value_ref = *value_ref_ref;
+	if (ht) {
+		zend_hash_internal_pointer_reset(ht);
+		while (zend_hash_get_current_data(ht, (void **) &value_ref_ref) == SUCCESS) {
+			value_ref = *value_ref_ref;
 
-		switch(value_ref->type) {
-			case ZEND_ANNOTATION_ZVAL:
-				val = value_ref->value.zval;
-				Z_ADDREF_P(val);
-				break;
-			case ZEND_ANNOTATION_HASH:
-				MAKE_STD_ZVAL(val);
-				zend_create_annotation_parameters(val, value_ref->value.ht TSRMLS_CC);
-				break;
-			case ZEND_ANNOTATION_ANNO:
-				MAKE_STD_ZVAL(val);
-				zend_create_annotation(val, value_ref->value.annotation TSRMLS_CC);
-				break;
-		}
+			switch(value_ref->type) {
+				case ZEND_ANNOTATION_ZVAL:
+					val = value_ref->value.zval;
+					Z_ADDREF_P(val);
+					break;
+				case ZEND_ANNOTATION_HASH:
+					MAKE_STD_ZVAL(val);
+					zend_create_annotation_parameters(val, value_ref->value.ht TSRMLS_CC);
+					break;
+				case ZEND_ANNOTATION_ANNO:
+					MAKE_STD_ZVAL(val);
+					zend_create_annotation(val, value_ref->value.annotation TSRMLS_CC);
+					break;
+			}
 
-		switch (zend_hash_get_current_key_ex(ht, &string_key, &str_key_len, &num_key, 0, NULL)) {
-			case HASH_KEY_IS_STRING:
-				zend_symtable_update(Z_ARRVAL_P(params), string_key, str_key_len, &val, sizeof(val), NULL);
-				break;
-			case HASH_KEY_IS_LONG:
-				zend_hash_index_update(Z_ARRVAL_P(params), num_key, &val, sizeof(val), NULL);
-				break;
+			switch (zend_hash_get_current_key_ex(ht, &string_key, &str_key_len, &num_key, 0, NULL)) {
+				case HASH_KEY_IS_STRING:
+					zend_symtable_update(Z_ARRVAL_P(params), string_key, str_key_len, &val, sizeof(val), NULL);
+					break;
+				case HASH_KEY_IS_LONG:
+					zend_hash_index_update(Z_ARRVAL_P(params), num_key, &val, sizeof(val), NULL);
+					break;
+			}
+			zend_hash_move_forward(ht);
 		}
-		zend_hash_move_forward(ht);
 	}
 }
 /* }}} */
