@@ -178,7 +178,7 @@ ZEND_API void zend_create_all_annotations(zval *res, HashTable *annotations TSRM
       Constructor*/
 ZEND_METHOD(Annotation, __construct)
 {
-	HashTable *data;
+	zval *data = NULL;
 	HashPosition pos;
 	zval **value;
 	zval *object = getThis();
@@ -186,22 +186,24 @@ ZEND_METHOD(Annotation, __construct)
 	uint str_key_len;
 	ulong num_key;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "H", &data) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|a!", &data) == FAILURE) {
 		return;
 	}
 	
-	zend_hash_internal_pointer_reset_ex(data, &pos);
-    while (zend_hash_get_current_data_ex(data, (void **)&value, &pos) == SUCCESS) {
-		switch (zend_hash_get_current_key_ex(data, &string_key, &str_key_len, &num_key, 1, &pos)) {
-			case HASH_KEY_IS_STRING:
-				zend_update_property(zend_ce_annotation, object, string_key, str_key_len - 1, *value TSRMLS_CC);
-				efree(string_key);
-				break;
-			case HASH_KEY_IS_LONG:
-				// TODO ADOY : Trigger an error
-				break;
+	if (data) {
+		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(data), &pos);
+		while (zend_hash_get_current_data_ex(data, (void **)&value, &pos) == SUCCESS) {
+			switch (zend_hash_get_current_key_ex(Z_ARRVAL_P(data), &string_key, &str_key_len, &num_key, 1, &pos)) {
+				case HASH_KEY_IS_STRING:
+					zend_update_property(zend_ce_annotation, object, string_key, str_key_len - 1, *value TSRMLS_CC);
+					efree(string_key);
+					break;
+				case HASH_KEY_IS_LONG:
+					// TODO ADOY : Trigger an error
+					break;
+			}
+			zend_hash_move_forward_ex(Z_ARRVAL_P(data), &pos);
 		}
-		zend_hash_move_forward_ex(data, &pos);
 	}
 }
 /* }}} */
