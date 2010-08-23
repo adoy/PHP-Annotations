@@ -85,7 +85,7 @@ static void zend_create_annotation_parameters(zval *params, HashTable *ht TSRMLS
 					break;
 				case ZEND_ANNOTATION_ANNO:
 					MAKE_STD_ZVAL(val);
-					zend_create_annotation(val, value_ref->value.annotation TSRMLS_CC);
+					zend_create_annotation(val, value_ref->value.annotation);
 					break;
 			}
 
@@ -103,18 +103,19 @@ static void zend_create_annotation_parameters(zval *params, HashTable *ht TSRMLS
 }
 /* }}} */
 
-ZEND_API void zend_create_annotation(zval *res, zend_annotation *annotation TSRMLS_DC) /* {{{ */
+ZEND_API void zend_create_annotation_ex(zval *res, zend_annotation *annotation, zend_class_entry *ce TSRMLS_DC) /* {{{ */
 {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
 	zval *retval_ptr;
-	zend_class_entry *ce = NULL;
 
-	ce = zend_fetch_class(annotation->annotation_name, annotation->aname_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
-	if (!ce) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not find class '%s'", annotation->annotation_name);
-	} else if (!instanceof_function(ce, zend_ce_annotation TSRMLS_CC)) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "'%s' must extends '%s'", annotation->annotation_name, ZEND_ANNOTATION_CLASS_NAME);
+	if (ce == NULL) {
+		ce = zend_fetch_class(annotation->annotation_name, annotation->aname_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
+		if (!ce) {
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not find class '%s'", annotation->annotation_name);
+		} else if (!instanceof_function(ce, zend_ce_annotation TSRMLS_CC)) {
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "'%s' must extends '%s'", annotation->annotation_name, ZEND_ANNOTATION_CLASS_NAME);
+		}
 	}
 	
 	object_init_ex(res, ce);
@@ -159,18 +160,74 @@ ZEND_API void zend_create_annotation(zval *res, zend_annotation *annotation TSRM
 }
 /* }}} */
 
-ZEND_API void zend_create_all_annotations(zval *res, HashTable *annotations TSRMLS_DC) /* {{{ */
+ZEND_API void zend_add_declared_annotations(zval *res, HashTable *annotations TSRMLS_DC) /* {{{ */
 {
 	zend_annotation **annotation_ref_ref, *annotation_ref;
 	zval *annotation_zval;
-	array_init(res);
-	
+
 	for (zend_hash_internal_pointer_reset(annotations); zend_hash_get_current_data(annotations, (void **)&annotation_ref_ref) == SUCCESS; zend_hash_move_forward(annotations)) {
 		MAKE_STD_ZVAL(annotation_zval);
 		annotation_ref = *annotation_ref_ref;
-		zend_create_annotation(annotation_zval, annotation_ref TSRMLS_CC);
+		zend_create_annotation(annotation_zval, annotation_ref);
 		add_assoc_zval_ex(res, annotation_ref->annotation_name, annotation_ref->aname_len +1, annotation_zval);
 	}
+}
+/* }}} */
+
+ZEND_API void zend_add_inherited_annotations(zval *res, HashTable *annotations TSRMLS_DC) /* {{{ */
+{
+	zend_annotation **annotation_ref_ref, *annotation_ref;
+	zend_class_entry *ce = NULL;
+	zval *annotation_zval;
+
+	for (zend_hash_internal_pointer_reset(annotations);
+			zend_hash_get_current_data(annotations, (void **)&annotation_ref_ref) == SUCCESS; zend_hash_move_forward(annotations)) {
+
+		annotation_ref = *annotation_ref_ref;
+		if (zend_symtable_exists(Z_ARRVAL_P(res), annotation_ref->annotation_name, annotation_ref->aname_len+ 1)) {
+			continue;
+		}
+
+		ce = zend_fetch_class(annotation_ref->annotation_name, annotation_ref->aname_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
+		if (!ce) {
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not find class '%s'", annotation_ref->annotation_name);
+		} else if (!instanceof_function(ce, zend_ce_annotation TSRMLS_CC)) {
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "'%s' must extends '%s'", annotation_ref->annotation_name, ZEND_ANNOTATION_CLASS_NAME);
+		} 
+
+		if (ce->type == ZEND_USER_CLASS && ce->annotations && 
+				zend_symtable_exists(ce->annotations, "Inherit", sizeof("Inherit"))) {
+			MAKE_STD_ZVAL(annotation_zval);
+			zend_create_annotation_ex(annotation_zval, annotation_ref, ce TSRMLS_CC);
+			add_assoc_zval_ex(res, annotation_ref->annotation_name, annotation_ref->aname_len +1, annotation_zval);
+		}
+	}
+}
+/* }}} */
+
+ZEND_API int zend_get_inherited_annotation(HashTable *annotations, const char *name, const uint nameLength, zval *res TSRMLS_DC) /* {{{ */
+{
+	zend_class_entry *annotation_ce;
+	zend_annotation **annotation_ref_ref, *annotation_ref;
+	if (zend_hash_find(annotations, name, nameLength+1, (void **) &annotation_ref_ref) == SUCCESS) {
+		
+		annotation_ref = *annotation_ref_ref;
+		annotation_ce = zend_fetch_class(annotation_ref->annotation_name, annotation_ref->aname_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
+
+		if (!annotation_ce) {                           
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not find class '%s'", annotation_ref->annotation_name);
+		} else if (!instanceof_function(annotation_ce, zend_ce_annotation TSRMLS_CC)) {
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "'%s' must extends '%s'", annotation_ref->annotation_name, ZEND_ANNOTATION_CLASS_NAME);
+		}
+
+		if (annotation_ce->type == ZEND_USER_CLASS && annotation_ce->annotations && zend_symtable_exists(annotation_ce->annotations, "Inherit", sizeof("Inherit"))) {
+			if (res != NULL) {
+				zend_create_annotation_ex(res, annotation_ref, annotation_ce TSRMLS_CC);
+			}
+			return SUCCESS;
+		}   
+	}
+	return FAILURE;
 }
 /* }}} */
 

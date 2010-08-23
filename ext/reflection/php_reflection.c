@@ -1802,10 +1802,10 @@ ZEND_METHOD(reflection_function, getAnnotations)
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(fptr);
+	array_init(return_value);
+
 	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.annotations) {
-		zend_create_all_annotations(return_value, fptr->op_array.annotations TSRMLS_CC);
-	} else {
-		array_init(return_value);
+		zend_add_declared_annotations(return_value, fptr->op_array.annotations TSRMLS_CC);
 	}
 }
 /* }}} */
@@ -1826,7 +1826,7 @@ ZEND_METHOD(reflection_function, getAnnotation)
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.annotations
 			&& zend_hash_find(fptr->op_array.annotations, name, name_length +1, (void **) &annotation) == SUCCESS) {
-		zend_create_annotation(return_value, *annotation TSRMLS_CC);
+		zend_create_annotation(return_value, *annotation);
 	} else {     
 		RETURN_FALSE;
 	}   
@@ -3629,10 +3629,16 @@ ZEND_METHOD(reflection_class, getAnnotations)
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
+	array_init(return_value);
+
 	if (ce->type == ZEND_USER_CLASS && ce->annotations) {
-		zend_create_all_annotations(return_value, ce->annotations TSRMLS_CC);
-	} else {
-		array_init(return_value);
+		zend_add_declared_annotations(return_value, ce->annotations TSRMLS_CC);
+	}
+
+	while((ce = ce->parent)) {
+		if (ce->type == ZEND_USER_CLASS && ce->annotations) {
+			zend_add_inherited_annotations(return_value, ce->annotations TSRMLS_CC);
+		}
 	}
 }
 /* }}} */
@@ -3643,20 +3649,28 @@ ZEND_METHOD(reflection_class, getAnnotation)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
-	zend_annotation **annotation;
+	zend_annotation **annotation_ref_ref;
 	char *name = NULL;
 	int name_length = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_length) == FAILURE) {
 		return;
 	}   
+
 	GET_REFLECTION_OBJECT_PTR(ce);
-	if (ce->type == ZEND_USER_CLASS && ce->annotations
-			&& zend_hash_find(ce->annotations, name, name_length +1, (void **) &annotation) == SUCCESS) {
-		zend_create_annotation(return_value, *annotation TSRMLS_CC);
-	} else {     
-		RETURN_FALSE;
-	}   
+
+	if (ce->type == ZEND_USER_CLASS && ce->annotations && zend_hash_find(ce->annotations, name, name_length +1, (void **) &annotation_ref_ref) == SUCCESS) {
+		zend_create_annotation(return_value, *annotation_ref_ref);
+		return;
+	}
+	
+	while((ce = ce->parent)) {
+		if (ce->type == ZEND_USER_CLASS && ce->annotations && zend_get_inherited_annotation(ce->annotations, name, name_length, return_value TSRMLS_CC) == SUCCESS) {
+			return;
+		}
+	}
+
+	RETURN_FALSE;
 }
 /* }}} */
 
@@ -3672,13 +3686,19 @@ ZEND_METHOD(reflection_class, hasAnnotation)
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_length) == FAILURE) {
 		return;
 	}
+
 	GET_REFLECTION_OBJECT_PTR(ce);
-	if (ce->type == ZEND_USER_CLASS && ce->annotations
-			&& zend_symtable_exists(ce->annotations, name, name_length + 1)) {
+
+	if (ce->type == ZEND_USER_CLASS && ce->annotations && zend_symtable_exists(ce->annotations, name, name_length + 1)) {
 		RETURN_TRUE;
-	} else {     
-		RETURN_FALSE;
-	}  
+	} 
+
+	while((ce = ce->parent)) {
+		if (ce->type == ZEND_USER_CLASS && ce->annotations && zend_get_inherited_annotation(ce->annotations, name, name_length, NULL TSRMLS_CC) == SUCCESS) {
+			RETURN_TRUE;	
+		}
+	}
+	RETURN_FALSE;
 }
 /* }}} */
 
@@ -5131,10 +5151,10 @@ ZEND_METHOD(reflection_property, getAnnotations)
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(ref);
+	array_init(return_value);
+
 	if (ref->prop.annotations) {
-		zend_create_all_annotations(return_value, ref->prop.annotations TSRMLS_CC);
-	} else {
-		array_init(return_value);
+		zend_add_declared_annotations(return_value, ref->prop.annotations TSRMLS_CC);
 	}
 }
 /* }}} */
@@ -5154,7 +5174,7 @@ ZEND_METHOD(reflection_property, getAnnotation)
 	}                                   
 	GET_REFLECTION_OBJECT_PTR(ref);
 	if (ref->prop.annotations && zend_hash_find(ref->prop.annotations, name, name_length +1, (void **) &annotation) == SUCCESS) {
-		zend_create_annotation(return_value, *annotation TSRMLS_CC);
+		zend_create_annotation(return_value, *annotation);
 	} else {     
 		RETURN_FALSE;
 	}   
