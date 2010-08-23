@@ -41,9 +41,9 @@ void zend_register_annotation_ce(TSRMLS_D);
 #define zend_create_annotation(r,a) zend_create_annotation_ex(r,a, NULL TSRMLS_CC)
 
 ZEND_API void zend_create_annotation_ex(zval *res, zend_annotation *annotation, zend_class_entry *ce TSRMLS_DC);
-ZEND_API void zend_create_all_annotations(zval *return_value, HashTable *annotations TSRMLS_DC); 
+ZEND_API void zend_add_declared_annotations(zval *return_value, HashTable *annotations TSRMLS_DC); 
 ZEND_API void zend_add_inherited_annotations(zval *res, HashTable *annotations TSRMLS_DC);
-ZEND_API int zend_get_inherited_annotations(HashTable *annotations, const char *name, const char nameLength, zval *res TSRMLS_DC);
+ZEND_API int zend_get_inherited_annotation(HashTable *annotations, const char *name, const char nameLength, zval *res TSRMLS_DC);
 
 END_EXTERN_C()
 

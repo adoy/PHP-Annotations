@@ -25,6 +25,7 @@
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 #include "zend_closures.h"
+#include "zend_annotations.h"
 
 
 ZEND_API void zend_register_default_classes(TSRMLS_D)
