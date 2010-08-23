@@ -3622,7 +3622,7 @@ ZEND_METHOD(reflection_class, getDocComment)
 }
 /* }}} */
 
-/** {{{ proto public array ReflectionClass::getAnnotations() 
+/** {{{ proto public array ReflectionClass::getAnnotations([long $filter]) 
     Returns all annotations for this class (or an empty array if the class has no annotation). */
 ZEND_METHOD(reflection_class, getAnnotations)
 {
@@ -3652,7 +3652,7 @@ ZEND_METHOD(reflection_class, getAnnotations)
 }
 /* }}} */
 
-/* {{{ proto public Annotation ReflectionClass::getAnnotation(string name) 
+/* {{{ proto public Annotation ReflectionClass::getAnnotation(string name [, long $filter]) 
    Return the annotation of the specified type if present, else null */
 ZEND_METHOD(reflection_class, getAnnotation)
 {
@@ -3687,7 +3687,7 @@ ZEND_METHOD(reflection_class, getAnnotation)
 }
 /* }}} */
 
-/* {{{ proto public boolean ReflectionClass::hasAnnotation(string name) 
+/* {{{ proto public boolean ReflectionClass::hasAnnotation(string name [, long $filter]) 
    Return true if the annotation of the specified type is present, else false */
 ZEND_METHOD(reflection_class, hasAnnotation)
 {
