@@ -1795,7 +1795,7 @@ ZEND_METHOD(reflection_function, getDocComment)
 }
 /* }}} */
 
-/** {{{ proto public array ReflectionFunction::getAnnotations() 
+/*  {{{ proto public array ReflectionFunction::getAnnotations() 
 	Returns all annotations for this function (or an empty array if the function has no annotation). */
 ZEND_METHOD(reflection_function, getAnnotations)
 {
@@ -3622,7 +3622,7 @@ ZEND_METHOD(reflection_class, getDocComment)
 }
 /* }}} */
 
-/** {{{ proto public array ReflectionClass::getAnnotations([long $filter]) 
+/*  {{{ proto public array ReflectionClass::getAnnotations([long $filter]) 
     Returns all annotations for this class (or an empty array if the class has no annotation). */
 ZEND_METHOD(reflection_class, getAnnotations)
 {
@@ -5159,7 +5159,7 @@ ZEND_METHOD(reflection_property, getDocComment)
 }
 /* }}} */
 
-/** {{{ proto public array ReflectionProperty::getAnnotations() 
+/*  {{{ proto public array ReflectionProperty::getAnnotations() 
     Returns all annotations for this property (or an empty array if the property has no annotation). */
 ZEND_METHOD(reflection_property, getAnnotations)
 {
