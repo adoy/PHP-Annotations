@@ -1805,7 +1805,7 @@ ZEND_METHOD(reflection_function, getAnnotations)
 	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.annotations) {
 		zend_create_all_annotations(return_value, fptr->op_array.annotations TSRMLS_CC);
 	} else {
-		RETURN_FALSE;
+		array_init(return_value);
 	}
 }
 /* }}} */
@@ -3632,7 +3632,7 @@ ZEND_METHOD(reflection_class, getAnnotations)
 	if (ce->type == ZEND_USER_CLASS && ce->annotations) {
 		zend_create_all_annotations(return_value, ce->annotations TSRMLS_CC);
 	} else {
-		RETURN_FALSE;
+		array_init(return_value);
 	}
 }
 /* }}} */
@@ -5134,7 +5134,7 @@ ZEND_METHOD(reflection_property, getAnnotations)
 	if (ref->prop.annotations) {
 		zend_create_all_annotations(return_value, ref->prop.annotations TSRMLS_CC);
 	} else {
-		RETURN_FALSE;
+		array_init(return_value);
 	}
 }
 /* }}} */
