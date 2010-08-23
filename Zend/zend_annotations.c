@@ -192,7 +192,7 @@ ZEND_METHOD(Annotation, __construct)
 	
 	if (data) {
 		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(data), &pos);
-		while (zend_hash_get_current_data_ex(data, (void **)&value, &pos) == SUCCESS) {
+		while (zend_hash_get_current_data_ex(Z_ARRVAL_P(data), (void **)&value, &pos) == SUCCESS) {
 			switch (zend_hash_get_current_key_ex(Z_ARRVAL_P(data), &string_key, &str_key_len, &num_key, 1, &pos)) {
 				case HASH_KEY_IS_STRING:
 					zend_update_property(zend_ce_annotation, object, string_key, str_key_len - 1, *value TSRMLS_CC);
