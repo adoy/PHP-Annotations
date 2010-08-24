@@ -6661,8 +6661,7 @@ void zend_do_end_annotation_declaration(TSRMLS_D) /* {{{ */
 			zend_hash_init(CG(annotations), 0, NULL, (dtor_func_t) zend_annotation_dtor, 0);
 		}
 
-		if (zend_hash_add(CG(annotations), annotation_ptr->annotation_name, annotation_ptr->aname_len + 1, &annotation_ptr, sizeof(zend_annotation *), NULL) == FAILURE)
-		{
+		if (zend_hash_add(CG(annotations), annotation_ptr->annotation_name, annotation_ptr->aname_len + 1, &annotation_ptr, sizeof(zend_annotation *), NULL) == FAILURE) {
 			zend_error(E_ERROR, "Cannot redeclare annotation '%s'", annotation_ptr->annotation_name);
 		}
 	}
