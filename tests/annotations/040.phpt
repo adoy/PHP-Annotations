@@ -1,5 +1,5 @@
 --TEST--
-ReflectionFunction::getAnnotations with Inherit 
+ReflectionClass::getAnnotations with Inherit 
 --FILE--
 <?php
 [Inherit]

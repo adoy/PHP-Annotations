@@ -42,9 +42,9 @@
 #include "zend_extensions.h"
 #include "zend_annotations.h"
 
-#define GET_INHERITED 1
-#define GET_DECLARED  2
-#define GET_BOTH      3
+#define GET_INHERITED (1<<0) 
+#define GET_DECLARED  (1<<1)
+#define GET_BOTH      GET_INHERITED | GET_DECLARED
 
 #define reflection_update_property(object, name, value) do { \
 		zval *member; \
