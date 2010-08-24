@@ -5823,7 +5823,6 @@ void reflection_create_annotation(zval *res, zend_annotation *annotation, zend_c
 		fci.object_ptr = res;
 		fci.retval_ptr_ptr = &retval_ptr;
 
-		// PARAMS
 		fci.param_count = 1;
 		fci.params = (zval***) safe_emalloc(sizeof(zval*), 1, 0);
 		fci.params[0] = &params;
