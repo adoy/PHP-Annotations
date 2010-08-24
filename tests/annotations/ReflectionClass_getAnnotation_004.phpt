@@ -4,7 +4,7 @@ ReflectionClass::getAnnotation with Inherit
 <?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
-[Inherit]
+[Inherited]
 class Annotation1 extends ReflectionAnnotation {}
 class Annotation2 extends ReflectionAnnotation {}
 
