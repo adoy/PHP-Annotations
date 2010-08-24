@@ -6649,6 +6649,7 @@ void zend_do_begin_annotation_declaration(const znode *annotation_token, znode *
 
 void zend_do_end_annotation_declaration(TSRMLS_D) /* {{{ */
 {
+	char *lc_name = NULL;
 	zend_annotation **annotation_ptr_ptr, *annotation_ptr;
 
 	zend_stack_top(&CG(annotation_stack), (void **) &annotation_ptr_ptr);
@@ -6661,9 +6662,13 @@ void zend_do_end_annotation_declaration(TSRMLS_D) /* {{{ */
 			zend_hash_init(CG(annotations), 0, NULL, (dtor_func_t) zend_annotation_dtor, 0);
 		}
 
-		if (zend_hash_add(CG(annotations), annotation_ptr->annotation_name, annotation_ptr->aname_len + 1, &annotation_ptr, sizeof(zend_annotation *), NULL) == FAILURE) {
+		lc_name = zend_str_tolower_dup(annotation_ptr->annotation_name, annotation_ptr->aname_len);
+
+		if (zend_hash_add(CG(annotations), lc_name, annotation_ptr->aname_len + 1, &annotation_ptr, sizeof(zend_annotation *), NULL) == FAILURE) {
+			efree(lc_name);
 			zend_error(E_ERROR, "Cannot redeclare annotation '%s'", annotation_ptr->annotation_name);
 		}
+		efree(lc_name);
 	}
 }
 /* }}} */
