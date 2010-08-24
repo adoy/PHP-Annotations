@@ -6723,7 +6723,12 @@ void zend_do_add_annotation_array_element(znode *key TSRMLS_DC) /* {{{ */
 
 void zend_do_scalar_annotation_value(znode *value TSRMLS_DC) /* {{{ */
 {
-	zend_annotation_value *av = (zend_annotation_value *) emalloc(sizeof(zend_annotation_value));
+	zend_annotation_value *av;
+	if(Z_TYPE(value->u.constant) == IS_CONSTANT_ARRAY) {
+		zend_error(E_COMPILE_ERROR, "Arrays are not allowed in annotation properties");
+		return;
+	}
+	av = (zend_annotation_value *) emalloc(sizeof(zend_annotation_value));
 	av->type = ZEND_ANNOTATION_ZVAL;
 	ALLOC_ZVAL(av->value.zval);
 	INIT_PZVAL_COPY(av->value.zval, &value->u.constant);
