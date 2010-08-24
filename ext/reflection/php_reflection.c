@@ -1814,7 +1814,7 @@ ZEND_METHOD(reflection_function, getAnnotations)
 	GET_REFLECTION_OBJECT_PTR(fptr);
 	array_init(return_value);
 
-	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.annotations) {
+	if (intern->ce == fptr->common.scope && fptr->type == ZEND_USER_FUNCTION && fptr->op_array.annotations) {
 		reflection_add_declared_annotations(return_value, fptr->op_array.annotations TSRMLS_CC);
 	}
 }
@@ -1834,7 +1834,7 @@ ZEND_METHOD(reflection_function, getAnnotation)
 		return;                         
 	}                                       
 	GET_REFLECTION_OBJECT_PTR(fptr);
-	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.annotations
+	if (intern->ce == fptr->common.scope && fptr->type == ZEND_USER_FUNCTION && fptr->op_array.annotations
 			&& zend_hash_find(fptr->op_array.annotations, name, name_length +1, (void **) &annotation) == SUCCESS) {
 		reflection_create_annotation(return_value, *annotation, NULL TSRMLS_CC);
 	} else {     
@@ -1857,7 +1857,7 @@ ZEND_METHOD(reflection_function, hasAnnotation)
 		return;
 	}   
 	GET_REFLECTION_OBJECT_PTR(fptr);
-	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.annotations 
+	if (intern->ce == fptr->common.scope && fptr->type == ZEND_USER_FUNCTION && fptr->op_array.annotations 
 			&& zend_symtable_exists(fptr->op_array.annotations, name, name_length + 1)) {
 		RETURN_TRUE;        
 	} else {                            
@@ -5765,6 +5765,12 @@ void reflection_create_annotation_parameters(zval *params, HashTable *ht TSRMLS_
 
 			switch(value_ref->type) {
 				case ZEND_ANNOTATION_ZVAL:
+					if ((Z_TYPE_P(value_ref->value.zval) & IS_CONSTANT_TYPE_MASK) == IS_CONSTANT ||
+							Z_TYPE_P(value_ref->value.zval)==IS_CONSTANT_ARRAY) {
+						char *str = Z_STRVAL_P(value_ref->value.zval);
+						zval_update_constant(&value_ref->value.zval, 0 TSRMLS_CC);
+						efree(str);
+					} 
 					val = value_ref->value.zval;
 					Z_ADDREF_P(val);
 					break;
@@ -5885,7 +5891,7 @@ void reflection_add_inherited_annotations(zval *res, HashTable *annotations TSRM
 		} 
 
 		if (ce->type == ZEND_USER_CLASS && ce->annotations && 
-				zend_symtable_exists(ce->annotations, "Inherit", sizeof("Inherit"))) {
+				zend_symtable_exists(ce->annotations, "Inherited", sizeof("Inherited"))) {
 			MAKE_STD_ZVAL(annotation_zval);
 			reflection_create_annotation(annotation_zval, annotation_ref, ce TSRMLS_CC);
 			add_assoc_zval_ex(res, annotation_ref->annotation_name, annotation_ref->aname_len +1, annotation_zval);
@@ -5909,7 +5915,7 @@ int reflection_get_inherited_annotation(HashTable *annotations, const char *name
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "'%s' must extend '%s' to act as an annotation", annotation_ref->annotation_name, reflection_annotation_ptr->name);
 		}
 
-		if (annotation_ce->type == ZEND_USER_CLASS && annotation_ce->annotations && zend_symtable_exists(annotation_ce->annotations, "Inherit", sizeof("Inherit"))) {
+		if (annotation_ce->type == ZEND_USER_CLASS && annotation_ce->annotations && zend_symtable_exists(annotation_ce->annotations, "Inherited", sizeof("Inherited"))) {
 			if (res != NULL) {
 				reflection_create_annotation(res, annotation_ref, annotation_ce TSRMLS_CC);
 			}
@@ -6587,6 +6593,9 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	REGISTER_REFLECTION_CLASS_CONST_LONG(annotation, "INHERITED", ANNOTATION_INHERITED);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(annotation, "DECLARED", ANNOTATION_DECLARED);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(annotation, "ALL", ANNOTATION_ALL);
+
+	INIT_CLASS_ENTRY(_reflection_entry, "Inherited", NULL);
+	zend_register_internal_class_ex(&_reflection_entry, reflection_annotation_ptr, NULL TSRMLS_CC);
 
 	return SUCCESS;
 } /* }}} */
