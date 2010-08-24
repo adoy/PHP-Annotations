@@ -6680,8 +6680,7 @@ void zend_do_add_annotation_value(znode *value_name TSRMLS_DC) /* {{{ */
 	annotation_ptr = *annotation_ptr_ptr;
 
 	if (value_name) { 
-		if (zend_hash_add(annotation_ptr->values, Z_STRVAL(value_name->u.constant), Z_STRLEN(value_name->u.constant) + 1, &annotation_value_ptr, sizeof(zend_annotation_value *), NULL) == FAILURE)
-		{
+		if (zend_hash_add(annotation_ptr->values, Z_STRVAL(value_name->u.constant), Z_STRLEN(value_name->u.constant) + 1, &annotation_value_ptr, sizeof(zend_annotation_value *), NULL) == FAILURE) {
 			zend_error(E_ERROR, "Cannot redeclare property '%s' on annotation '%s'", Z_STRVAL(value_name->u.constant), annotation_ptr->annotation_name);			
 		}
 		zend_do_free(value_name TSRMLS_CC);
