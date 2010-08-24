@@ -25,7 +25,6 @@
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 #include "zend_closures.h"
-#include "zend_annotations.h"
 
 
 ZEND_API void zend_register_default_classes(TSRMLS_D)
@@ -34,7 +33,6 @@ ZEND_API void zend_register_default_classes(TSRMLS_D)
 	zend_register_default_exception(TSRMLS_C);
 	zend_register_iterator_wrapper(TSRMLS_C);
 	zend_register_closure_ce(TSRMLS_C);
-	zend_register_annotation_ce(TSRMLS_C);
 }
 
 /*

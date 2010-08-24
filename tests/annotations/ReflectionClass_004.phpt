@@ -14,9 +14,9 @@ class Test extends TestBase {
 }
 
 $r = new ReflectionClass('Test');
-var_dump($r->getAnnotations(ReflectionClass::GET_INHERITED));
-var_dump($r->getAnnotations(ReflectionClass::GET_DECLARED));
-var_dump($r->getAnnotations(ReflectionClass::GET_BOTH));
+var_dump($r->getAnnotations(ReflectionAnnotation::INHERITED));
+var_dump($r->getAnnotations(ReflectionAnnotation::DECLARED));
+var_dump($r->getAnnotations(ReflectionAnnotation::ALL));
 ?>
 --EXPECTF--
 array(1) {

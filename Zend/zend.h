@@ -421,6 +421,10 @@ struct _zend_unserialize_data;
 typedef struct _zend_serialize_data zend_serialize_data;
 typedef struct _zend_unserialize_data zend_unserialize_data;
 
+#define ZEND_ANNOTATION_ZVAL 1
+#define ZEND_ANNOTATION_ANNO 2
+#define ZEND_ANNOTATION_HASH 3
+
 struct _zend_annotation {
 	char *annotation_name;
 	unsigned int aname_len;

@@ -14,12 +14,12 @@ class Test extends TestBase {
 }
 
 $r = new ReflectionClass('Test');
-var_dump($r->hasAnnotation('Annotation1', ReflectionClass::GET_INHERITED));
-var_dump($r->hasAnnotation('Annotation1', ReflectionClass::GET_DECLARED));
-var_dump($r->hasAnnotation('Annotation1', ReflectionClass::GET_BOTH));
-var_dump($r->hasAnnotation('Annotation2', ReflectionClass::GET_INHERITED));
-var_dump($r->hasAnnotation('Annotation2', ReflectionClass::GET_DECLARED));
-var_dump($r->hasAnnotation('Annotation2', ReflectionClass::GET_BOTH));
+var_dump($r->hasAnnotation('Annotation1', ReflectionAnnotation::INHERITED));
+var_dump($r->hasAnnotation('Annotation1', ReflectionAnnotation::DECLARED));
+var_dump($r->hasAnnotation('Annotation1', ReflectionAnnotation::ALL));
+var_dump($r->hasAnnotation('Annotation2', ReflectionAnnotation::INHERITED));
+var_dump($r->hasAnnotation('Annotation2', ReflectionAnnotation::DECLARED));
+var_dump($r->hasAnnotation('Annotation2', ReflectionAnnotation::ALL));
 ?>
 --EXPECTF--
 bool(true)
