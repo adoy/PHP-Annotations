@@ -1,15 +1,19 @@
 --TEST--
-ReflectionFunction::getAnnotations with simple annotation
+ReflectionProperty::getAnnotations with simple annotation
+--SKIPIF--
+<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 
 class SimpleAnnotation extends ReflectionAnnotation {
 }
 
-[SimpleAnnotation]
-function foo() {}
+class Foo {
+	[SimpleAnnotation]
+	public $bar;
+}
 
-$r = new ReflectionFunction('Foo');
+$r = new ReflectionProperty('Foo','bar');
 var_dump($r->getAnnotations());
 
 ?>

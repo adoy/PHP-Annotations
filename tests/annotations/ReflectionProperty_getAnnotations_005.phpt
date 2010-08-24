@@ -1,13 +1,18 @@
 --TEST--
-ReflectionProperty::getAnnotations with simple annotation
+ReflectionProperty::getAnnotations with overrided property 
+--SKIPIF--
+<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 
 class SimpleAnnotation extends ReflectionAnnotation {
 }
 
-class Foo {
+abstract class Base {
 	[SimpleAnnotation]
+	public $bar;
+}
+class Foo extends Base {
 	public $bar;
 }
 
@@ -16,10 +21,5 @@ var_dump($r->getAnnotations());
 
 ?>
 --EXPECTF--
-array(1) {
-  ["SimpleAnnotation"]=>
-  object(SimpleAnnotation)#%d (1) {
-    ["value"]=>
-    NULL
-  }
+array(0) {
 }

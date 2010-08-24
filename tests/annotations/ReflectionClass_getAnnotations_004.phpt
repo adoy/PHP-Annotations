@@ -1,5 +1,7 @@
 --TEST--
 ReflectionClass::getAnnotations with Inherit 
+--SKIPIF--
+<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 [Inherit]

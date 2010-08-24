@@ -1,5 +1,7 @@
 --TEST--
 ReflectionClass::hasAnnotation with simple annotation
+--SKIPIF--
+<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 

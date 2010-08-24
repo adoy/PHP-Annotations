@@ -1,5 +1,7 @@
 --TEST--
-ReflectionMethod::getAnnotations with complex annotations
+ReflectionClass::getAnnotations with complex annotations
+--SKIPIF--
+<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 
@@ -9,18 +11,15 @@ class SimpleAnnotation2 extends ReflectionAnnotation {
 	public $foo;	
 }
 
+[SimpleAnnotation1(value={
+	[SimpleAnnotation2()],
+	[SimpleAnnotation2("test")],
+	[SimpleAnnotation2(foo="bar")]
+})]
 class Foo {
-	[SimpleAnnotation1(value={
-		[SimpleAnnotation2()],
-		[SimpleAnnotation2("test")],
-		[SimpleAnnotation2(foo="bar")]
-	})]
-	public function bar() {}
 }
 
-$foo = new Foo();
-
-$r = new ReflectionMethod('Foo','bar');
+$r = new ReflectionClass('Foo');
 var_dump($r->getAnnotations());
 
 ?>

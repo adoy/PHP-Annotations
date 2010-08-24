@@ -1,5 +1,7 @@
 --TEST--
-ReflectionProperty::getAnnotations with complex annotations
+ReflectionFunction::getAnnotations with complex annotations
+--SKIPIF--
+<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 
@@ -9,16 +11,14 @@ class SimpleAnnotation2 extends ReflectionAnnotation {
 	public $foo;	
 }
 
-class Foo {
-	[SimpleAnnotation1(value={
-		[SimpleAnnotation2()],
-		[SimpleAnnotation2("test")],
-		[SimpleAnnotation2(foo="bar")]
-	})]
-	public $bar;
-}
+[SimpleAnnotation1(value={
+	[SimpleAnnotation2()],
+	[SimpleAnnotation2("test")],
+	[SimpleAnnotation2(foo="bar")]
+})]
+function foo() {}
 
-$r = new ReflectionProperty('Foo','bar');
+$r = new ReflectionFunction('Foo');
 var_dump($r->getAnnotations());
 
 ?>
