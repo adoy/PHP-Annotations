@@ -1837,8 +1837,6 @@ ZEND_METHOD(reflection_function, getAnnotation)
 	if (intern->ce == fptr->common.scope && fptr->type == ZEND_USER_FUNCTION && fptr->op_array.annotations
 			&& zend_hash_find(fptr->op_array.annotations, name, name_length +1, (void **) &annotation) == SUCCESS) {
 		reflection_create_annotation(return_value, *annotation, NULL TSRMLS_CC);
-	} else {     
-		RETURN_FALSE;
 	}   
 
 }
@@ -3688,8 +3686,6 @@ ZEND_METHOD(reflection_class, getAnnotation)
 			}
 		}
 	}
-
-	RETURN_FALSE;
 }
 /* }}} */
 
@@ -5200,8 +5196,6 @@ ZEND_METHOD(reflection_property, getAnnotation)
 	GET_REFLECTION_OBJECT_PTR(ref);
 	if (ref->prop.annotations && zend_hash_find(ref->prop.annotations, name, name_length +1, (void **) &annotation) == SUCCESS) {
 		reflection_create_annotation(return_value, *annotation, NULL TSRMLS_CC);
-	} else {     
-		RETURN_FALSE;
 	}   
 }
 /* }}} */

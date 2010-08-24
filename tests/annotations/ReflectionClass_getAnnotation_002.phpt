@@ -13,4 +13,4 @@ var_dump($r->getAnnotation('SimpleAnnotation'));
 
 ?>
 --EXPECTF--
-bool(false)
+NULL

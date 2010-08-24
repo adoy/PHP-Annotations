@@ -28,12 +28,12 @@ object(Annotation1)#%d (1) {
   ["value"]=>
   string(9) "inherited"
 }
-bool(false)
+NULL
 object(Annotation1)#%d (1) {
   ["value"]=>
   string(9) "inherited"
 }
-bool(false)
+NULL
 object(Annotation2)#%d (1) {
   ["value"]=>
   string(8) "declared"
