@@ -114,7 +114,7 @@ ZEND_API void zend_create_annotation_ex(zval *res, zend_annotation *annotation, 
 		if (!ce) {
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not find class '%s'", annotation->annotation_name);
 		} else if (!instanceof_function(ce, zend_ce_annotation TSRMLS_CC)) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "'%s' must extends '%s'", annotation->annotation_name, ZEND_ANNOTATION_CLASS_NAME);
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "'%s' must extend '%s' to act as an annotation", annotation->annotation_name, ZEND_ANNOTATION_CLASS_NAME);
 		}
 	}
 	
@@ -192,7 +192,7 @@ ZEND_API void zend_add_inherited_annotations(zval *res, HashTable *annotations T
 		if (!ce) {
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not find class '%s'", annotation_ref->annotation_name);
 		} else if (!instanceof_function(ce, zend_ce_annotation TSRMLS_CC)) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "'%s' must extends '%s'", annotation_ref->annotation_name, ZEND_ANNOTATION_CLASS_NAME);
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "'%s' must extend '%s' to act as an annotation", annotation_ref->annotation_name, ZEND_ANNOTATION_CLASS_NAME);
 		} 
 
 		if (ce->type == ZEND_USER_CLASS && ce->annotations && 
@@ -217,7 +217,7 @@ ZEND_API int zend_get_inherited_annotation(HashTable *annotations, const char *n
 		if (!annotation_ce) {                           
 			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not find class '%s'", annotation_ref->annotation_name);
 		} else if (!instanceof_function(annotation_ce, zend_ce_annotation TSRMLS_CC)) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "'%s' must extends '%s'", annotation_ref->annotation_name, ZEND_ANNOTATION_CLASS_NAME);
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "'%s' must extend '%s' to act as an annotation", annotation_ref->annotation_name, ZEND_ANNOTATION_CLASS_NAME);
 		}
 
 		if (annotation_ce->type == ZEND_USER_CLASS && annotation_ce->annotations && zend_symtable_exists(annotation_ce->annotations, "Inherit", sizeof("Inherit"))) {

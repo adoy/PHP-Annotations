@@ -6637,7 +6637,7 @@ void zend_do_end_annotation_declaration(TSRMLS_D) /* {{{ */
 
 		if (zend_hash_add(CG(annotations), annotation_ptr->annotation_name, annotation_ptr->aname_len + 1, &annotation_ptr, sizeof(zend_annotation *), NULL) == FAILURE)
 		{
-			zend_error(E_ERROR, "Failed to add annotation (%s). There is probably already an annotation with the same name", annotation_ptr->annotation_name);
+			zend_error(E_ERROR, "Cannot redeclare annotation '%s'", annotation_ptr->annotation_name);
 		}
 	}
 }
@@ -6657,7 +6657,7 @@ void zend_do_add_annotation_value(znode *value_name TSRMLS_DC) /* {{{ */
 	if (value_name) { 
 		if (zend_hash_add(annotation_ptr->values, Z_STRVAL(value_name->u.constant), Z_STRLEN(value_name->u.constant) + 1, &annotation_value_ptr, sizeof(zend_annotation_value *), NULL) == FAILURE)
 		{
-			zend_error(E_ERROR, "Failed to add property (%s). There is probably already a property with the same name", Z_STRVAL(value_name->u.constant));			
+			zend_error(E_ERROR, "Cannot redeclare property '%s' on annotation '%s'", Z_STRVAL(value_name->u.constant), annotation_ptr->annotation_name);			
 		}
 		zend_do_free(value_name TSRMLS_CC);
 	} else {
@@ -6735,7 +6735,7 @@ void zend_do_constant_annotation_value(znode *value TSRMLS_DC) /* {{{ */
 {
 	zend_do_fetch_constant(value, NULL, value, ZEND_CT, 0 TSRMLS_CC);
 	if (value->u.constant.type & IS_CONSTANT) {
-		zend_error(E_COMPILE_ERROR, "Constant is undefined");
+		zend_error(E_COMPILE_ERROR, "Undefined constant '%s'. You cannot use runtime defined constants on annotations.", Z_STRVAL(value->u.constant));
 	} else {
 		zend_do_scalar_annotation_value(value TSRMLS_CC);
 	}
