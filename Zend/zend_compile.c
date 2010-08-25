@@ -6599,21 +6599,21 @@ ZEND_API size_t zend_dirname(char *path, size_t len)
 /* }}} */
 
 static void zend_annotation_dtor(void **ptr) { /* {{{ */
-    zend_annotation *a = (zend_annotation *) *ptr;
-    efree(a->annotation_name);
-    if (a->values) {
-        zend_hash_destroy(a->values);
-        efree(a->values);
-    }
-    efree(*ptr);
+	zend_annotation *a = (zend_annotation *) *ptr;
+	efree(a->annotation_name);
+	if (a->values) {
+		zend_hash_destroy(a->values);
+		efree(a->values);
+	}
+	efree(*ptr);
 }
 /* }}} */
 
 static void zend_annotation_value_dtor(void **ptr) { /* {{{ */
     zend_annotation_value *value = (zend_annotation_value *) *ptr;
     if (value->type == ZEND_ANNOTATION_ZVAL) {
-        zval_dtor(value->value.zval);
-        efree(value->value.zval);
+		zval_dtor(value->value.zval);
+		efree(value->value.zval);
     } else if (value->type == ZEND_ANNOTATION_HASH) {
         zend_hash_destroy(value->value.ht);
         efree(value->value.ht);
