@@ -6610,18 +6610,18 @@ static void zend_annotation_dtor(void **ptr) { /* {{{ */
 /* }}} */
 
 static void zend_annotation_value_dtor(void **ptr) { /* {{{ */
-    zend_annotation_value *value = (zend_annotation_value *) *ptr;
-    if (value->type == ZEND_ANNOTATION_ZVAL) {
+	zend_annotation_value *value = (zend_annotation_value *) *ptr;
+	if (value->type == ZEND_ANNOTATION_ZVAL) {
 		zval_dtor(value->value.zval);
 		efree(value->value.zval);
-    } else if (value->type == ZEND_ANNOTATION_HASH) {
-        zend_hash_destroy(value->value.ht);
-        efree(value->value.ht);
-    } else if (value->type == ZEND_ANNOTATION_ANNO) {
-        zend_annotation **a = &value->value.annotation;
-        zend_annotation_dtor((void *) a);
-    }
-    efree(*ptr);
+	} else if (value->type == ZEND_ANNOTATION_HASH) {
+		zend_hash_destroy(value->value.ht);
+		efree(value->value.ht);
+	} else if (value->type == ZEND_ANNOTATION_ANNO) {
+		zend_annotation **a = &value->value.annotation;
+		zend_annotation_dtor((void *) a);
+	}
+	efree(*ptr);
 }
 /* }}} */
 
