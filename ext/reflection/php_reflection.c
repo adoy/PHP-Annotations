@@ -116,6 +116,22 @@ ZEND_DECLARE_MODULE_GLOBALS(reflection)
 #define REGISTER_REFLECTION_CLASS_CONST_LONG(class_name, const_name, value)                                        \
 	zend_declare_class_constant_long(reflection_ ## class_name ## _ptr, const_name, sizeof(const_name)-1, (long)value TSRMLS_CC);
 
+#define FETCH_ANNOTATION_CE(ace, aname, alength) \
+		ace = zend_fetch_class(aname, alength, ZEND_FETCH_CLASS_AUTO TSRMLS_CC); \
+		if (!ace) { \
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not find class '%s'", aname); \
+		} else if ((ace->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) != 0) { \
+			if (ace->ce_flags & ZEND_ACC_INTERFACE) { \
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot instantiate interface %s", ace->name); \
+			} else if ((ace->ce_flags & ZEND_ACC_TRAIT) == ZEND_ACC_TRAIT) { \
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot instantiate trait %s", ace->name); \
+			} else { \
+				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Cannot instantiate abstract class %s", ace->name); \
+			} \
+		} else if (!instanceof_function(ace, reflection_annotation_ptr TSRMLS_CC)) { \
+			php_error_docref(NULL TSRMLS_CC, E_ERROR, "'%s' must extend '%s' to act as an annotation", ace->name, reflection_annotation_ptr->name); \
+		} 
+
 /* {{{ Smart string functions */
 typedef struct _string {
 	char *string;
@@ -218,7 +234,7 @@ typedef struct {
 
 /* Struct for reflection annotation */
 typedef struct _annotation_reflection_object {
-	        zend_object std;
+	zend_object std;
 } annotation_reflection_object;
 
 /* }}} */
@@ -5813,12 +5829,7 @@ void reflection_create_annotation(zval *res, zend_annotation *annotation, zend_c
 	zval *retval_ptr;
 
 	if (ce == NULL) {
-		ce = zend_fetch_class(annotation->annotation_name, annotation->aname_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
-		if (!ce) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not find class '%s'", annotation->annotation_name);
-		} else if (!instanceof_function(ce, reflection_annotation_ptr TSRMLS_CC)) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "'%s' must extend '%s' to act as an annotation", annotation->annotation_name, reflection_annotation_ptr->name);
-		}
+		FETCH_ANNOTATION_CE(ce, annotation->annotation_name, annotation->aname_len);
 	}
 	
 	object_init_ex(res, ce);
@@ -5890,12 +5901,7 @@ void reflection_add_inherited_annotations(zval *res, HashTable *annotations TSRM
 			continue;
 		}
 
-		ce = zend_fetch_class(annotation_ref->annotation_name, annotation_ref->aname_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
-		if (!ce) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not find class '%s'", annotation_ref->annotation_name);
-		} else if (!instanceof_function(ce, reflection_annotation_ptr TSRMLS_CC)) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "'%s' must extend '%s' to act as an annotation", annotation_ref->annotation_name, reflection_annotation_ptr->name);
-		} 
+		FETCH_ANNOTATION_CE(ce, annotation_ref->annotation_name, annotation_ref->aname_len);
 
 		if (ce->type == ZEND_USER_CLASS && ce->annotations && 
 				zend_symtable_exists(ce->annotations, "inherited", sizeof("inherited"))) {
@@ -5914,13 +5920,8 @@ int reflection_get_inherited_annotation(HashTable *annotations, const char *name
 	if (zend_hash_find(annotations, name, nameLength+1, (void **) &annotation_ref_ref) == SUCCESS) {
 		
 		annotation_ref = *annotation_ref_ref;
-		annotation_ce = zend_fetch_class(annotation_ref->annotation_name, annotation_ref->aname_len, ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
 
-		if (!annotation_ce) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Could not find class '%s'", annotation_ref->annotation_name);
-		} else if (!instanceof_function(annotation_ce, reflection_annotation_ptr TSRMLS_CC)) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "'%s' must extend '%s' to act as an annotation", annotation_ref->annotation_name, reflection_annotation_ptr->name);
-		}
+		FETCH_ANNOTATION_CE(annotation_ce, annotation_ref->annotation_name, annotation_ref->aname_len);
 
 		if (annotation_ce->type == ZEND_USER_CLASS && annotation_ce->annotations && zend_symtable_exists(annotation_ce->annotations, "inherited", sizeof("inherited"))) {
 			if (res != NULL) {
