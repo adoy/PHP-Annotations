@@ -329,12 +329,12 @@ unticked_class_declaration_statement:
 			'{'
 				class_statement_list
 			'}' { zend_do_end_class_declaration(&$2, &$3 TSRMLS_CC); }
-	|	interface_entry T_STRING
-			{ zend_do_begin_class_declaration(&$1, &$2, NULL TSRMLS_CC); }
+	|	annotations interface_entry T_STRING
+			{ zend_do_begin_class_declaration(&$2, &$3, NULL TSRMLS_CC); }
 			interface_extends_list
 			'{'
 				class_statement_list
-			'}' { zend_do_end_class_declaration(&$1, &$2 TSRMLS_CC); }
+			'}' { zend_do_end_class_declaration(&$2, &$3 TSRMLS_CC); }
 ;
 
 
