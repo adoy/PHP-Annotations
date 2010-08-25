@@ -3552,7 +3552,6 @@ static void zend_traits_duplicate_function(zend_function *fe, char *newname)
 	}
 
 	fe->op_array.doc_comment = estrndup(fe->op_array.doc_comment, fe->op_array.doc_comment_len);
-	/* TODO ADOY: Make a copy of the annotation */
 
 	fe->op_array.try_catch_array = (zend_try_catch_element*)estrndup((char*)fe->op_array.try_catch_array, sizeof(zend_try_catch_element) * fe->op_array.last_try_catch);
 
