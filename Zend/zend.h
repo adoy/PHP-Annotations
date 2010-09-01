@@ -430,6 +430,7 @@ struct _zend_annotation {
 	unsigned int aname_len;
 
 	HashTable *values;
+	zval *instance;
 };
 typedef struct _zend_annotation zend_annotation;
 

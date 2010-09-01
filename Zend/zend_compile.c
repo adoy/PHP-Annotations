@@ -6642,6 +6642,7 @@ void zend_do_begin_annotation_declaration(const znode *annotation_token, znode *
 	} else {
 		annotation_ptr->values = NULL;
 	}
+	annotation_ptr->instance = NULL;
 	
 	zend_stack_push(&CG(annotation_stack), (void *) &annotation_ptr, sizeof(zend_annotation *));
 }

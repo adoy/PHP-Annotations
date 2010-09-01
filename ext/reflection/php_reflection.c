@@ -5891,47 +5891,56 @@ void reflection_create_annotation(zval *res, zend_annotation *annotation, zend_c
 	zend_fcall_info_cache fcc;
 	zval *retval_ptr;
 
-	if (ce == NULL) {
-		FETCH_ANNOTATION_CE(ce, annotation->annotation_name, annotation->aname_len);
-	}
-	
-	object_init_ex(res, ce);
+	if (annotation->instance) {
+		*res = *annotation->instance;
+		zval_copy_ctor(res);
+		INIT_PZVAL(res);
+	} else {
+		if (ce == NULL) {
+			FETCH_ANNOTATION_CE(ce, annotation->annotation_name, annotation->aname_len);
+		}
 
-	if (ce->constructor) {
-		zval *params = NULL;
-		MAKE_STD_ZVAL(params);
+		object_init_ex(res, ce);
 
-		reflection_create_annotation_parameters(params, annotation->values TSRMLS_CC);
+		if (ce->constructor) {
+			zval *params = NULL;
+			MAKE_STD_ZVAL(params);
 
-		fci.size = sizeof(fci);
-		fci.function_table = &ce->function_table;
-		fci.function_name = NULL;
-		fci.symbol_table = NULL;
+			reflection_create_annotation_parameters(params, annotation->values TSRMLS_CC);
 
-		fci.object_ptr = res;
-		fci.retval_ptr_ptr = &retval_ptr;
+			fci.size = sizeof(fci);
+			fci.function_table = &ce->function_table;
+			fci.function_name = NULL;
+			fci.symbol_table = NULL;
 
-		fci.param_count = 1;
-		fci.params = (zval***) safe_emalloc(sizeof(zval*), 1, 0);
-		fci.params[0] = &params;
+			fci.object_ptr = res;
+			fci.retval_ptr_ptr = &retval_ptr;
 
-		fcc.initialized = 1;
-		fcc.function_handler = ce->constructor;
-		fcc.calling_scope = EG(scope);
-		fcc.called_scope = Z_OBJCE_P(res);
-		fcc.object_ptr = res;
+			fci.param_count = 1;
+			fci.params = (zval***) safe_emalloc(sizeof(zval*), 1, 0);
+			fci.params[0] = &params;
 
-		if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
-			zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC, "Could not execute %s::%s()", ce->name, ce->constructor->common.function_name);
-		} else {
-			if (retval_ptr) {
-				zval_ptr_dtor(&retval_ptr);
+			fcc.initialized = 1;
+			fcc.function_handler = ce->constructor;
+			fcc.calling_scope = EG(scope);
+			fcc.called_scope = Z_OBJCE_P(res);
+			fcc.object_ptr = res;
+
+			if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
+				zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC, "Could not execute %s::%s()", ce->name, ce->constructor->common.function_name);
+			} else {
+				if (retval_ptr) {
+					zval_ptr_dtor(&retval_ptr);
+				}
 			}
+			if (fci.params) {
+				efree(fci.params);
+			}
+			zval_ptr_dtor(&params);
 		}
-		if (fci.params) {
-			efree(fci.params);
-		}
-		zval_ptr_dtor(&params);
+
+		annotation->instance = res;
+		zval_copy_ctor(annotation->instance);
 	}
 }
 /* }}} */
