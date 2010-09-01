@@ -5,7 +5,7 @@ Multiple Annotations in method test
 <?php
 
 class Foo {
-    [Annotation({"foo", "bar", "red"})]
+    [Annotation(array("foo", "bar", "red"))]
     [AnotherAnnotation]
     public function bar() {
         echo 'do nothing';

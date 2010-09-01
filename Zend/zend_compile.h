@@ -603,7 +603,7 @@ void zend_do_begin_annotation_declaration(const znode *annotation_token, znode *
 void zend_do_end_annotation_declaration(TSRMLS_D);
 void zend_do_add_annotation_value(znode *name TSRMLS_DC);
 void zend_do_init_annotation_array(TSRMLS_D);
-void zend_do_add_annotation_array_element(znode *key TSRMLS_DC);
+void zend_do_add_annotation_array_element(znode *offset TSRMLS_DC);
 void zend_do_scalar_annotation_value(znode *value TSRMLS_DC);
 void zend_do_array_annotation_value(TSRMLS_D);
 void zend_do_annotation_annotation_value(TSRMLS_D);

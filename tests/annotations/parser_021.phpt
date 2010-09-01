@@ -15,12 +15,12 @@ class User
     [ManyToMany(targetEntity="Phonenumber")]
     [JoinTable(
         name="users_phonenumbers",
-        joinColumns={
+        joinColumns=array(
             [JoinColumn(name="user_id", referencedColumnName="id")]
-        },
-        inverseJoinColumns={
+		),
+        inverseJoinColumns=array(
             [JoinColumn(name="phonenumber_id", referencedColumnName="id", unique=true)]
-        }
+		)
     )]
     function foo() {}
 }

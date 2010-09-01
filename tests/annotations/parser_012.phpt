@@ -5,7 +5,7 @@ Annotation in property using array test
 <?php
 
 class Foo {
-    [Annotation({"foo", "bar", "red"})]
+    [Annotation(array("foo", "bar", "red"))]
     public $bar;
 }
 

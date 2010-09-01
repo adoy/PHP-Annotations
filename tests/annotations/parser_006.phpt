@@ -4,7 +4,7 @@ Multiple Annotations in class test
 
 <?php
 
-[Annotation({"foo", "bar", "red"})]
+[Annotation(array("foo", "bar", "red"))]
 [AnotherAnnotation]
 class Foo {
 }

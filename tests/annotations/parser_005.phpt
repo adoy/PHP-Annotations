@@ -4,7 +4,7 @@ Annotation in class using array test
 
 <?php
 
-[Annotation({"foo", "bar", "red"})]
+[Annotation(array("foo", "bar", "red"))]
 class Foo {
 }
 

@@ -1130,20 +1130,30 @@ annotation_value:
 ;
 
 annotation_plain_value:
-		static_scalar { zend_do_scalar_annotation_value(&$1 TSRMLS_CC); }
+		annotation_scalar { zend_do_scalar_annotation_value(&$1 TSRMLS_CC); }
 	| 	annotation { zend_do_annotation_annotation_value(TSRMLS_C); }
 	|   annotation_array { zend_do_array_annotation_value(TSRMLS_C); }
 ;
 
+annotation_scalar:
+		common_scalar       { $$ = $1; }
+	|	namespace_name      { zend_do_fetch_constant(&$$, NULL, &$1, ZEND_CT, 1 TSRMLS_CC); }
+	|	T_NAMESPACE T_NS_SEPARATOR namespace_name { $$.op_type = IS_CONST; ZVAL_EMPTY_STRING(&$$.u.constant);  zend_do_build_namespace_name(&$$, &$$, &$3 TSRMLS_CC); $3 = $$; zend_do_fetch_constant(&$$, NULL, &$3, ZEND_CT, 0 TSRMLS_CC); }
+	|	T_NS_SEPARATOR namespace_name { char *tmp = estrndup(Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1); memcpy(&(tmp[1]), Z_STRVAL($2.u.constant), Z_STRLEN($2.u.constant)+1); tmp[0] = '\\'; efree(Z_STRVAL($2.u.constant)); Z_STRVAL($2.u.constant) = tmp; ++Z_STRLEN($2.u.constant); zend_do_fetch_constant(&$$, NULL, &$2, ZEND_CT, 0 TSRMLS_CC); }
+	|	'+' static_scalar { ZVAL_LONG(&$1.u.constant, 0); add_function(&$2.u.constant, &$1.u.constant, &$2.u.constant TSRMLS_CC); $$ = $2; }
+	|	'-' static_scalar { ZVAL_LONG(&$1.u.constant, 0); sub_function(&$2.u.constant, &$1.u.constant, &$2.u.constant TSRMLS_CC); $$ = $2; }
+	|	static_class_constant { $$ = $1; }
+;
+
 annotation_array:
-		'{' { zend_do_init_annotation_array(TSRMLS_C); } annotation_array_list '}'
-	| 	'{' '}' { zend_do_init_annotation_array(TSRMLS_C); }
+		T_ARRAY '(' { zend_do_init_annotation_array(TSRMLS_C); } annotation_array_list ')'
+	| 	T_ARRAY '(' ')' { zend_do_init_annotation_array(TSRMLS_C); }
 ;
 
 annotation_array_list:
-		annotation_array_list ',' common_scalar T_DOUBLE_ARROW annotation_plain_value { zend_do_add_annotation_array_element(&$3 TSRMLS_CC); }
+		annotation_array_list ',' annotation_scalar T_DOUBLE_ARROW annotation_plain_value { zend_do_add_annotation_array_element(&$3 TSRMLS_CC); }
 	|	annotation_array_list ',' annotation_plain_value { zend_do_add_annotation_array_element(NULL TSRMLS_CC); }
-	| 	common_scalar T_DOUBLE_ARROW annotation_plain_value { zend_do_add_annotation_array_element(&$1 TSRMLS_CC); }
+	| 	annotation_scalar T_DOUBLE_ARROW annotation_plain_value { zend_do_add_annotation_array_element(&$1 TSRMLS_CC); }
 	| 	annotation_plain_value { zend_do_add_annotation_array_element(NULL TSRMLS_CC); }
 ;
 

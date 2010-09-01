@@ -5,7 +5,7 @@ Annotation in method using array test
 <?php
 
 class Foo {
-    [Annotation({"foo", "bar", "red"})]
+    [Annotation(array("foo", "bar", "red"))]
     public function bar() {
         echo 'do nothing';
     }

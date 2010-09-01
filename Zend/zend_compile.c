@@ -6610,6 +6610,7 @@ static void zend_annotation_dtor(void **ptr) { /* {{{ */
 
 static void zend_annotation_value_dtor(void **ptr) { /* {{{ */
 	zend_annotation_value *value = (zend_annotation_value *) *ptr;
+	value->type &= ~IS_CONSTANT_INDEX;
 	if (value->type == ZEND_ANNOTATION_ZVAL) {
 		zval_dtor(value->value.zval);
 		efree(value->value.zval);
@@ -6702,7 +6703,7 @@ void zend_do_init_annotation_array(TSRMLS_D) /* {{{ */
 }
 /* }}} */
 
-void zend_do_add_annotation_array_element(znode *key TSRMLS_DC) /* {{{ */
+void zend_do_add_annotation_array_element(znode *offset TSRMLS_DC) /* {{{ */
 {
 	HashTable **ht_ptr_ptr, *ht_ptr;
 	zend_annotation_value **annotation_value_ptr_ptr, *annotation_value_ptr;
@@ -6714,11 +6715,37 @@ void zend_do_add_annotation_array_element(znode *key TSRMLS_DC) /* {{{ */
 	zend_stack_top(&CG(annotation_stack), (void **) &ht_ptr_ptr);
 	ht_ptr = *ht_ptr_ptr;
 
-	if (key == NULL) {
-		zend_hash_next_index_insert(ht_ptr, &annotation_value_ptr, sizeof(zend_annotation_value *), NULL);
+	if (offset) {
+        switch (offset->u.constant.type & IS_CONSTANT_TYPE_MASK) {
+            case IS_CONSTANT:
+                /* Ugly hack to denote that this value has a constant index */
+                annotation_value_ptr->type |= IS_CONSTANT_INDEX;
+                Z_STRVAL(offset->u.constant) = erealloc(Z_STRVAL(offset->u.constant), Z_STRLEN(offset->u.constant)+3);
+                Z_STRVAL(offset->u.constant)[Z_STRLEN(offset->u.constant)+1] = Z_TYPE(offset->u.constant);
+                Z_STRVAL(offset->u.constant)[Z_STRLEN(offset->u.constant)+2] = 0;
+                zend_symtable_update(ht_ptr, Z_STRVAL(offset->u.constant), Z_STRLEN(offset->u.constant)+3, &annotation_value_ptr, sizeof(zend_annotation_value *), NULL);
+                zval_dtor(&offset->u.constant);
+                break;
+            case IS_STRING:
+                zend_symtable_update(ht_ptr, Z_STRVAL(offset->u.constant), Z_STRLEN(offset->u.constant)+1, &annotation_value_ptr, sizeof(zend_annotation_value *), NULL);
+                zval_dtor(&offset->u.constant);
+                break;
+            case IS_NULL:
+                zend_symtable_update(ht_ptr, "", 1, &annotation_value_ptr, sizeof(zend_annotation_value *), NULL);
+                break;
+            case IS_LONG:
+            case IS_BOOL:
+                zend_hash_index_update(ht_ptr, Z_LVAL(offset->u.constant), &annotation_value_ptr, sizeof(zend_annotation_value *), NULL);
+                break;
+            case IS_DOUBLE:
+                zend_hash_index_update(ht_ptr, zend_dval_to_lval(Z_DVAL(offset->u.constant)), &annotation_value_ptr, sizeof(zend_annotation_value *), NULL);
+                break;
+            case IS_CONSTANT_ARRAY:
+                zend_error(E_ERROR, "Illegal offset type");
+                break;
+		}
 	} else {
-		zend_symtable_update(ht_ptr, Z_STRVAL(key->u.constant), Z_STRLEN(key->u.constant) + 1, &annotation_value_ptr, sizeof(zend_annotation_value *), NULL);
-		zend_do_free(key TSRMLS_CC);
+		zend_hash_next_index_insert(ht_ptr, &annotation_value_ptr, sizeof(zend_annotation_value *), NULL);
 	}
 }
 /* }}} */

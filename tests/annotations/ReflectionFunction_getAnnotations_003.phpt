@@ -11,11 +11,11 @@ class SimpleAnnotation2 extends ReflectionAnnotation {
 	public $foo;	
 }
 
-[SimpleAnnotation1(value={
+[SimpleAnnotation1(value=array(
 	[SimpleAnnotation2()],
 	[SimpleAnnotation2("test")],
 	[SimpleAnnotation2(foo="bar")]
-})]
+))]
 function foo() {}
 
 $r = new ReflectionFunction('Foo');
