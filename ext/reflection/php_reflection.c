@@ -6044,6 +6044,23 @@ ZEND_METHOD(reflection_annotation, __construct)
 }
 /* }}} */
 
+/* {{{ proto public int ReflectionAnnotation::setAccessible(bool visible)
+      Sets whether annotation properties can be modified */
+ZEND_METHOD(reflection_annotation, setAccessible)
+{
+	zval *object = getThis();
+	zend_bool visible;
+	annotation_reflection_object *i_obj;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "b", &visible) == FAILURE) {
+		return;
+	}
+
+	i_obj = (annotation_reflection_object *) zend_object_store_get_object(object TSRMLS_CC); 
+	i_obj->readonly = !visible;
+}
+/* }}} */
+
 static void reflection_annotation_free_storage(annotation_reflection_object *intern TSRMLS_DC) /* {{{ */
 {
 	zend_object_std_dtor(&intern->std TSRMLS_CC);
@@ -6501,8 +6518,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_annotation__construct, 0, 0, 0)
 	ZEND_ARG_ARRAY_INFO(0, data, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_reflection_annotation_setAccessible, 0)
+	ZEND_ARG_INFO(0, visible)
+ZEND_END_ARG_INFO()
+
 static const zend_function_entry reflection_annotation_functions[] = {
 	ZEND_ME(reflection_annotation, __construct, arginfo_reflection_annotation__construct, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	ZEND_ME(reflection_annotation, setAccessible, arginfo_reflection_annotation_setAccessible, 0)
 	{NULL, NULL, NULL}
 };
 
