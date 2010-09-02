@@ -235,6 +235,7 @@ typedef struct {
 /* Struct for reflection annotation */
 typedef struct _annotation_reflection_object {
 	zend_object std;
+	zend_bool readonly;
 } annotation_reflection_object;
 
 /* }}} */
@@ -6016,6 +6017,7 @@ ZEND_METHOD(reflection_annotation, __construct)
 	char *string_key;
 	uint str_key_len;
 	ulong num_key;
+	annotation_reflection_object *i_obj;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|a!", &data) == FAILURE) {
 		return;
@@ -6036,6 +6038,9 @@ ZEND_METHOD(reflection_annotation, __construct)
 			zend_hash_move_forward_ex(Z_ARRVAL_P(data), &pos);
 		}
 	}
+	
+	i_obj = (annotation_reflection_object *) zend_object_store_get_object(object TSRMLS_CC); 
+	i_obj->readonly = 1;
 }
 /* }}} */
 
@@ -6052,6 +6057,7 @@ static zend_object_value reflection_annotation_new(zend_class_entry *class_type 
 	annotation_reflection_object *intern;
 
 	intern = (annotation_reflection_object *) ecalloc(1, sizeof(annotation_reflection_object));
+	intern->readonly = 0;
 
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
 	object_properties_init(&intern->std, class_type);
@@ -6496,7 +6502,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_annotation__construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 static const zend_function_entry reflection_annotation_functions[] = {
-	ZEND_ME(reflection_annotation, __construct, arginfo_reflection_annotation__construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(reflection_annotation, __construct, arginfo_reflection_annotation__construct, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	{NULL, NULL, NULL}
 };
 
@@ -6540,10 +6546,10 @@ static zval *_reflection_annotation_read_property(zval *object, zval *member, in
 			std_hnd = zend_get_std_object_handlers();
 			retval = std_hnd->read_property(object, member, type, key TSRMLS_CC);
 		} else {
-			zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC, "Unknown property '%s' on annotation '%s'", Z_STRVAL_P(member), ce->name);
+			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Unknown property '%s' on annotation '%s'", Z_STRVAL_P(member), ce->name);
 		}
 	} else {
-		zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC, "Unknown property on annotation '%s'", ce->name);
+		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Unknown property on annotation '%s'", ce->name);
 	}
 	return retval;
 }
@@ -6554,18 +6560,22 @@ static void _reflection_annotation_write_property(zval *object, zval *member, zv
 {
 	zend_object_handlers *std_hnd;
 	zend_class_entry *ce;
-
+	
+	annotation_reflection_object *i_obj = (annotation_reflection_object *) zend_object_store_get_object(object TSRMLS_CC); 
+	
 	ce = Z_OBJCE_P(object);
 
-	if (Z_TYPE_P(member) == IS_STRING) {
+	if (i_obj->readonly) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Cannot set read-only property %s::$%s", ce->name, Z_STRVAL_P(member));
+	} else if (Z_TYPE_P(member) == IS_STRING) {
 		if (zend_symtable_exists(&ce->properties_info, Z_STRVAL_P(member), Z_STRLEN_P(member) + 1)) {
 			std_hnd = zend_get_std_object_handlers();
 			std_hnd->write_property(object, member, value, key TSRMLS_CC);
 		} else {
-			zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC, "Unknown property '%s' on annotation '%s'", Z_STRVAL_P(member), ce->name);
+			zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Unknown property '%s' on annotation '%s'", Z_STRVAL_P(member), ce->name);
 		}
 	} else {
-		zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC, "Unknown property on annotation '%s'", ce->name);
+		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Unknown property on annotation '%s'", ce->name);
 	}
 }
 /* }}} */
