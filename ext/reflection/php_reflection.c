@@ -5891,16 +5891,14 @@ void reflection_create_annotation(zval *res, zend_annotation *annotation, zend_c
 	zend_fcall_info_cache fcc;
 	zval *retval_ptr;
 
-	if (annotation->instance) {
-		*res = *annotation->instance;
-		zval_copy_ctor(res);
-		INIT_PZVAL(res);
-	} else {
+	if (!annotation->instance) {
+
 		if (ce == NULL) {
 			FETCH_ANNOTATION_CE(ce, annotation->annotation_name, annotation->aname_len);
 		}
 
-		object_init_ex(res, ce);
+		MAKE_STD_ZVAL(annotation->instance);
+		object_init_ex(annotation->instance, ce);
 
 		if (ce->constructor) {
 			zval *params = NULL;
@@ -5913,7 +5911,7 @@ void reflection_create_annotation(zval *res, zend_annotation *annotation, zend_c
 			fci.function_name = NULL;
 			fci.symbol_table = NULL;
 
-			fci.object_ptr = res;
+			fci.object_ptr = annotation->instance;
 			fci.retval_ptr_ptr = &retval_ptr;
 
 			fci.param_count = 1;
@@ -5923,8 +5921,8 @@ void reflection_create_annotation(zval *res, zend_annotation *annotation, zend_c
 			fcc.initialized = 1;
 			fcc.function_handler = ce->constructor;
 			fcc.calling_scope = EG(scope);
-			fcc.called_scope = Z_OBJCE_P(res);
-			fcc.object_ptr = res;
+			fcc.called_scope = Z_OBJCE_P(annotation->instance);
+			fcc.object_ptr = annotation->instance;
 
 			if (zend_call_function(&fci, &fcc TSRMLS_CC) == FAILURE) {
 				zend_throw_exception_ex(zend_exception_get_default(TSRMLS_C), 0 TSRMLS_CC, "Could not execute %s::%s()", ce->name, ce->constructor->common.function_name);
@@ -5938,10 +5936,11 @@ void reflection_create_annotation(zval *res, zend_annotation *annotation, zend_c
 			}
 			zval_ptr_dtor(&params);
 		}
-
-		annotation->instance = res;
-		zval_copy_ctor(annotation->instance);
 	}
+
+	*res = *annotation->instance;
+	zval_copy_ctor(res);
+	INIT_PZVAL(res);
 }
 /* }}} */
 

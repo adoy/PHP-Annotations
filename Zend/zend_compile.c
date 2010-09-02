@@ -6604,6 +6604,9 @@ static void zend_annotation_dtor(void **ptr) { /* {{{ */
 		zend_hash_destroy(a->values);
 		efree(a->values);
 	}
+	if (a->instance) {
+		zval_ptr_dtor(&a->instance);
+	}
 	efree(*ptr);
 }
 /* }}} */
