@@ -18,6 +18,6 @@ var_dump($r->getAnnotation('SimpleAnnotation'));
 ?>
 --EXPECTF--
 object(SimpleAnnotation)#2 (1) {
-  ["value"]=>
+  ["value":protected]=>
   NULL
 }

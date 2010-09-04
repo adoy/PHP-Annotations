@@ -20,7 +20,7 @@ var_dump($r->getAnnotations());
 array(1) {
   ["SimpleAnnotation"]=>
   object(SimpleAnnotation)#%d (1) {
-    ["value"]=>
+    ["value":protected]=>
     string(3) "OK!"
   }
 }

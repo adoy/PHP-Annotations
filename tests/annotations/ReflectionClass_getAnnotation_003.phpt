@@ -25,27 +25,27 @@ var_dump($r->getAnnotation('SimpleAnnotation1'));
 ?>
 --EXPECTF--
 object(SimpleAnnotation1)#%d (1) {
-  ["value"]=>
+  ["value":protected]=>
   array(3) {
     [0]=>
     object(SimpleAnnotation2)#%d (2) {
       ["foo"]=>
       NULL
-      ["value"]=>
+      ["value":protected]=>
       NULL
     }
     [1]=>
     object(SimpleAnnotation2)#%d (2) {
       ["foo"]=>
       NULL
-      ["value"]=>
+      ["value":protected]=>
       string(4) "test"
     }
     [2]=>
     object(SimpleAnnotation2)#%d (2) {
       ["foo"]=>
       string(3) "bar"
-      ["value"]=>
+      ["value":protected]=>
       NULL
     }
   }

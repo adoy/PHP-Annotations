@@ -223,7 +223,6 @@ typedef struct {
 /* Struct for reflection annotation */
 typedef struct _annotation_reflection_object {
 	zend_object std;
-	zend_bool readonly;
 } annotation_reflection_object;
 
 /* }}} */
@@ -5765,53 +5764,26 @@ ZEND_METHOD(reflection_zend_extension, getCopyright)
 ZEND_METHOD(reflection_annotation, __construct)
 {
 	zval *data = NULL;
-	HashPosition pos;
-	zval **value;
 	zval *object = getThis();
-	char *string_key;
-	uint str_key_len;
-	ulong num_key;
-	annotation_reflection_object *i_obj;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|a!", &data) == FAILURE) {
 		return;
 	}
 	
 	if (data) {
-		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(data), &pos);
-		while (zend_hash_get_current_data_ex(Z_ARRVAL_P(data), (void **)&value, &pos) == SUCCESS) {
-			switch (zend_hash_get_current_key_ex(Z_ARRVAL_P(data), &string_key, &str_key_len, &num_key, 1, &pos)) {
-				case HASH_KEY_IS_STRING:
-					zend_update_property(reflection_annotation_ptr, object, string_key, str_key_len - 1, *value TSRMLS_CC);
-					efree(string_key);
-					break;
-				case HASH_KEY_IS_LONG:
-					// TODO ADOY : Trigger an error
-					break;
-			}
-			zend_hash_move_forward_ex(Z_ARRVAL_P(data), &pos);
-		}
+		zend_merge_properties(object, Z_ARRVAL_P(data), 0 TSRMLS_CC);
 	}
-	
-	i_obj = (annotation_reflection_object *) zend_object_store_get_object(object TSRMLS_CC); 
-	i_obj->readonly = 1;
 }
 /* }}} */
 
-/* {{{ proto public int ReflectionAnnotation::setAccessible(bool visible)
-      Sets whether annotation properties can be modified */
-ZEND_METHOD(reflection_annotation, setAccessible)
+/** {{{ proto public mixed ReflectionAnnotation::getValue(void) 
+ */
+ZEND_METHOD(reflection_annotation, getValue)
 {
-	zval *object = getThis();
-	zend_bool visible;
-	annotation_reflection_object *i_obj;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "b", &visible) == FAILURE) {
-		return;
-	}
-
-	i_obj = (annotation_reflection_object *) zend_object_store_get_object(object TSRMLS_CC); 
-	i_obj->readonly = !visible;
+	zval *value = zend_read_property(Z_OBJCE_P(getThis()), getThis(), "value", sizeof("value")-1, 1 TSRMLS_CC);
+	*return_value = *value;
+ 	zval_copy_ctor(return_value);
+ 	INIT_PZVAL(return_value);
 }
 /* }}} */
 
@@ -5828,7 +5800,6 @@ static zend_object_value reflection_annotation_new(zend_class_entry *class_type 
 	annotation_reflection_object *intern;
 
 	intern = (annotation_reflection_object *) ecalloc(1, sizeof(annotation_reflection_object));
-	intern->readonly = 0;
 
 	zend_object_std_init(&intern->std, class_type TSRMLS_CC);
 	object_properties_init(&intern->std, class_type);
@@ -6272,13 +6243,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_annotation__construct, 0, 0, 0)
 	ZEND_ARG_ARRAY_INFO(0, data, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_reflection_annotation_setAccessible, 0)
-	ZEND_ARG_INFO(0, visible)
-ZEND_END_ARG_INFO()
-
 static const zend_function_entry reflection_annotation_functions[] = {
-	ZEND_ME(reflection_annotation, __construct, arginfo_reflection_annotation__construct, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	ZEND_ME(reflection_annotation, setAccessible, arginfo_reflection_annotation_setAccessible, 0)
+	ZEND_ME(reflection_annotation, __construct, arginfo_reflection_annotation__construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(reflection_annotation, getValue, arginfo_reflection__void, 0)
 	{NULL, NULL, NULL}
 };
 
@@ -6336,14 +6303,10 @@ static void _reflection_annotation_write_property(zval *object, zval *member, zv
 {
 	zend_object_handlers *std_hnd;
 	zend_class_entry *ce;
-	
-	annotation_reflection_object *i_obj = (annotation_reflection_object *) zend_object_store_get_object(object TSRMLS_CC); 
-	
+
 	ce = Z_OBJCE_P(object);
 
-	if (i_obj->readonly) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0 TSRMLS_CC, "Cannot set read-only property %s::$%s", ce->name, Z_STRVAL_P(member));
-	} else if (Z_TYPE_P(member) == IS_STRING) {
+	if (Z_TYPE_P(member) == IS_STRING) {
 		if (zend_symtable_exists(&ce->properties_info, Z_STRVAL_P(member), Z_STRLEN_P(member) + 1)) {
 			std_hnd = zend_get_std_object_handlers();
 			std_hnd->write_property(object, member, value, key TSRMLS_CC);
@@ -6468,7 +6431,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	reflection_annotation_ptr = zend_register_internal_class(&_reflection_entry TSRMLS_CC);
 	reflection_annotation_ptr->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
 	reflection_annotation_ptr->create_object = reflection_annotation_new;
-	zend_declare_property_null(reflection_annotation_ptr, "value", sizeof("value")-1, ZEND_ACC_PUBLIC TSRMLS_CC);
+	zend_declare_property_null(reflection_annotation_ptr, "value", sizeof("value")-1, ZEND_ACC_PROTECTED TSRMLS_CC);
 
 	memcpy(&reflection_annotation_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	reflection_annotation_handlers.write_property = _reflection_annotation_write_property;

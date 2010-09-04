@@ -24,26 +24,26 @@ var_dump($r->getAnnotations(ReflectionAnnotation::ALL));
 array(1) {
   ["Annotation1"]=>
   object(Annotation1)#%d (1) {
-    ["value"]=>
+    ["value":protected]=>
     string(9) "inherited"
   }
 }
 array(1) {
   ["Annotation2"]=>
   object(Annotation2)#%d (1) {
-    ["value"]=>
+    ["value":protected]=>
     string(8) "declared"
   }
 }
 array(2) {
   ["Annotation2"]=>
   object(Annotation2)#%d (1) {
-    ["value"]=>
+    ["value":protected]=>
     string(8) "declared"
   }
   ["Annotation1"]=>
   object(Annotation1)#%d (1) {
-    ["value"]=>
+    ["value":protected]=>
     string(9) "inherited"
   }
 }

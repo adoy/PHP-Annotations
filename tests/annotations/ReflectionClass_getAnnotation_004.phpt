@@ -25,20 +25,20 @@ var_dump($r->getAnnotation('Annotation2', ReflectionAnnotation::ALL));
 ?>
 --EXPECTF--
 object(Annotation1)#%d (1) {
-  ["value"]=>
+  ["value":protected]=>
   string(9) "inherited"
 }
 NULL
 object(Annotation1)#%d (1) {
-  ["value"]=>
+  ["value":protected]=>
   string(9) "inherited"
 }
 NULL
 object(Annotation2)#%d (1) {
-  ["value"]=>
+  ["value":protected]=>
   string(8) "declared"
 }
 object(Annotation2)#%d (1) {
-  ["value"]=>
+  ["value":protected]=>
   string(8) "declared"
 }
