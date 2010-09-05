@@ -45,6 +45,12 @@ extern PHPAPI zend_class_entry *reflection_annotation_ptr;
 
 PHPAPI void zend_reflection_class_factory(zend_class_entry *ce, zval *object TSRMLS_DC);
 
+void reflection_create_annotation(zval *res, zend_annotation *annotation, zval *reflector, zend_class_entry *ce TSRMLS_DC);
+void reflection_add_declared_annotations(zval *return_value, HashTable *annotations, zval *reflector TSRMLS_DC);
+void reflection_add_inherited_annotations(zval *res, HashTable *annotations, zval *reflector TSRMLS_DC);
+int reflection_get_inherited_annotation(HashTable *annotations, const char *name, const uint nameLength, zval *reflector, zval *res TSRMLS_DC);
+
+	
 END_EXTERN_C()
 
 #endif /* PHP_REFLECTION_H */
