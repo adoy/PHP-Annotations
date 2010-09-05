@@ -6015,7 +6015,7 @@ ZEND_METHOD(reflection_annotation, __construct)
 	zval *data = NULL;
 	zval *object = getThis();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z|a!", &reflector, &data) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "O|a!", &reflector, reflector_ptr, &data) == FAILURE) {
 		return;
 	}
 
