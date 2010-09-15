@@ -6633,6 +6633,15 @@ void zend_do_begin_annotation_declaration(const znode *annotation_token, znode *
 	zval *name;
 	zend_annotation *annotation_ptr;
 
+	if (annotation_name->op_type == IS_CONST &&
+	    ZEND_FETCH_CLASS_DEFAULT == zend_get_class_fetch_type(Z_STRVAL(annotation_name->u.constant), Z_STRLEN(annotation_name->u.constant))) {
+		ulong fetch_type = ZEND_FETCH_CLASS_GLOBAL;
+
+		zend_resolve_class_name(annotation_name, &fetch_type, 1 TSRMLS_CC);
+	} else {
+		zend_error(E_COMPILE_ERROR, "Bad class name in annotation statement");
+	}
+
 	name = &annotation_name->u.constant;
 
 	annotation_ptr = (zend_annotation *) emalloc(sizeof(zend_annotation));
