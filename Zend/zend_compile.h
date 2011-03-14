@@ -203,6 +203,7 @@ typedef struct _zend_arg_info {
 	zend_bool pass_by_reference;
 	zend_bool return_reference;
 	int required_num_args;
+	HashTable *annotations;
 } zend_arg_info;
 
 typedef struct _zend_compiled_variable {

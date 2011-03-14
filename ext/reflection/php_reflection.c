@@ -2692,6 +2692,73 @@ ZEND_METHOD(reflection_parameter, getDefaultValue)
 }
 /* }}} */
 
+/*  {{{ proto public array ReflectionParameter::getAnnotations() 
+    Returns all annotations for this parameter (or an empty array if the function has no annotation). */
+ZEND_METHOD(reflection_parameter, getAnnotations)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	GET_REFLECTION_OBJECT_PTR(param);
+	array_init(return_value);
+	if (param->arg_info->annotations) {
+		reflection_add_declared_annotations(return_value, param->arg_info->annotations, getThis() TSRMLS_CC);
+	}
+}
+/* }}} */
+
+/* {{{ proto public Annotation ReflectionParameter::getAnnotation(string name) 
+   Return the annotation of the specified type if present, else null */
+ZEND_METHOD(reflection_parameter, getAnnotation)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	zend_annotation **annotation;
+	char *name = NULL;
+	int name_length = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_length) == FAILURE) {
+		return;
+	}
+
+	GET_REFLECTION_OBJECT_PTR(param);
+	zend_str_tolower(name, name_length);
+
+	if (param->arg_info->annotations
+			&& zend_hash_find(param->arg_info->annotations, name, name_length +1, (void **) &annotation) == SUCCESS) {
+		reflection_create_annotation(return_value, *annotation, getThis(), NULL TSRMLS_CC);
+	}
+}
+/* }}} */
+
+/* {{{ proto public boolean ReflectionParameter::hasAnnotation(string name) 
+   Return true if the annotation of the specified type is present, else false */
+ZEND_METHOD(reflection_parameter, hasAnnotation)
+{
+    reflection_object *intern;
+    parameter_reference *param;
+    char *name = NULL;
+    int name_length = 0;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &name, &name_length) == FAILURE) {
+        return;
+    }
+
+    GET_REFLECTION_OBJECT_PTR(param);
+    zend_str_tolower(name, name_length);
+
+    if (param->arg_info->annotations && zend_symtable_exists(param->arg_info->annotations, name, name_length + 1)) {
+        RETURN_TRUE;
+    } else {
+        RETURN_FALSE;
+    }
+}
+/* }}} */
+
 /* {{{ proto public static mixed ReflectionMethod::export(mixed class, string name [, bool return]) throws ReflectionException
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_method, export)
@@ -6417,6 +6484,10 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection_parameter___construct, 0)
 	ZEND_ARG_INFO(0, parameter)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_reflection_parameter_getAnnotation, 0)
+    ZEND_ARG_INFO(0, name)
+ZEND_END_ARG_INFO()
+
 static const zend_function_entry reflection_parameter_functions[] = {
 	ZEND_ME(reflection, __clone, arginfo_reflection__void, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	ZEND_ME(reflection_parameter, export, arginfo_reflection_parameter_export, ZEND_ACC_STATIC|ZEND_ACC_PUBLIC)
@@ -6440,6 +6511,9 @@ static const zend_function_entry reflection_parameter_functions[] = {
 	ZEND_ME(reflection_parameter, isOptional, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, isDefaultValueAvailable, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_parameter, getDefaultValue, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_parameter, getAnnotations, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_parameter, getAnnotation, arginfo_reflection_parameter_getAnnotation, 0)
+	ZEND_ME(reflection_parameter, hasAnnotation, arginfo_reflection_parameter_getAnnotation, 0)
 	{NULL, NULL, NULL}
 };
 

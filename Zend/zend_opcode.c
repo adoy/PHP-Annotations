@@ -388,6 +388,11 @@ ZEND_API void destroy_op_array(zend_op_array *op_array TSRMLS_DC)
 			if (op_array->arg_info[i].class_name && !IS_INTERNED(op_array->arg_info[i].class_name)) {
 				efree((char*)op_array->arg_info[i].class_name);
 			}
+			if (op_array->arg_info[i].annotations) {
+				zend_hash_destroy(op_array->arg_info[i].annotations);
+				efree(op_array->arg_info[i].annotations);
+
+			}
 		}
 		efree(op_array->arg_info);
 	}

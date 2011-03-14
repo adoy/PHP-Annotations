@@ -1861,6 +1861,13 @@ void zend_do_receive_arg(zend_uchar op, znode *varname, const znode *offset, con
 	cur_arg_info->pass_by_reference = pass_by_reference;
 	cur_arg_info->class_name = NULL;
 	cur_arg_info->class_name_len = 0;
+	
+	if (CG(annotations)) {
+		cur_arg_info->annotations = CG(annotations);
+		CG(annotations) = NULL;
+	} else {
+		cur_arg_info->annotations = NULL;
+	}
 
 	if (class_type->op_type != IS_UNUSED) {
 		cur_arg_info->allow_null = 0;
