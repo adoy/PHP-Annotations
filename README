@@ -1,0 +1,6 @@
+To try the native annotation support in PHP apply the appropriate patch to your php source code.
+
+Exemple :
+
+If you want to test annotations with PHP 5.4.0, download php source code and apply the patch :
+patch -p0 -i Annotations-initial-PHP_5_4_0.diff
