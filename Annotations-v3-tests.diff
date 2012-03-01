@@ -1,0 +1,1513 @@
+Index: tests/annotations/namespace_001.inc
+===================================================================
+--- tests/annotations/namespace_001.inc	(revision 0)
++++ tests/annotations/namespace_001.inc	(revision 0)
+@@ -0,0 +1,5 @@
++<?php
++
++namespace Foo;
++
++class Bar implements \ReflectionAnnotation {}
+Index: tests/annotations/parser_001.phpt
+===================================================================
+--- tests/annotations/parser_001.phpt	(revision 0)
++++ tests/annotations/parser_001.phpt	(revision 0)
+@@ -0,0 +1,17 @@
++--TEST--
++Annotation in class without value test
++--FILE--
++
++<?php
++
++<Annotation>
++class Foo {
++}
++
++$foo = new Foo();
++
++echo 'OK!';
++
++?>
++--EXPECT--
++OK!
+Index: tests/annotations/ReflectionClass_getAnnotations_001.phpt
+===================================================================
+--- tests/annotations/ReflectionClass_getAnnotations_001.phpt	(revision 0)
++++ tests/annotations/ReflectionClass_getAnnotations_001.phpt	(revision 0)
+@@ -0,0 +1,24 @@
++--TEST--
++ReflectionClass::getAnnotations with simple annotation
++--SKIPIF--
++<?php extension_loaded('reflection') or die('skip'); ?>
++--FILE--
++<?php
++
++class SimpleAnnotation implements ReflectionAnnotation {
++}
++
++<SimpleAnnotation>
++class Foo {
++}
++
++$r = new ReflectionClass('Foo');
++var_dump($r->getAnnotations());
++
++?>
++--EXPECTF--
++array(1) {
++  ["SimpleAnnotation"]=>
++  object(SimpleAnnotation)#%d (0) {
++  }
++}
+Index: tests/annotations/parser_011.phpt
+===================================================================
+--- tests/annotations/parser_011.phpt	(revision 0)
++++ tests/annotations/parser_011.phpt	(revision 0)
+@@ -0,0 +1,18 @@
++--TEST--
++Annotation in property using properties test
++--FILE--
++
++<?php
++
++class Foo {
++    <Annotation("value", "bar")>
++    public $bar;
++}
++
++$foo = new Foo();
++
++echo 'OK!';
++
++?>
++--EXPECT--
++OK!
+Index: tests/annotations/parser_021.phpt
+===================================================================
+--- tests/annotations/parser_021.phpt	(revision 0)
++++ tests/annotations/parser_021.phpt	(revision 0)
+@@ -0,0 +1,34 @@
++--TEST--
++Complex Annotations in class test
++--FILE--
++
++<?php
++
++<Entity("users")>
++class User
++{
++    <Column("integer")>
++    <Id>
++    <GeneratedValue("AUTO")>
++    protected $id;
++
++    <ManyToMany("Phonenumber")>
++    <JoinTable(
++        "users_phonenumbers",
++        array(
++            <JoinColumn("user_id", "id")>
++		),
++        array(
++            <JoinColumn("phonenumber_id", "id", true)>
++		)
++    )>
++    function foo() {}
++}
++
++$user = new User();
++
++echo 'OK!';
++
++?>
++--EXPECT--
++OK!
+Index: tests/annotations/ReflectionClass_getAnnotations_003.phpt
+===================================================================
+--- tests/annotations/ReflectionClass_getAnnotations_003.phpt	(revision 0)
++++ tests/annotations/ReflectionClass_getAnnotations_003.phpt	(revision 0)
+@@ -0,0 +1,64 @@
++--TEST--
++ReflectionClass::getAnnotations with complex annotations
++--SKIPIF--
++<?php extension_loaded('reflection') or die('skip'); ?>
++--FILE--
++<?php
++
++class SimpleAnnotation1 implements ReflectionAnnotation {
++	protected $value;
++	public function __construct($value) {
++		$this->value = $value;
++	}
++}
++class SimpleAnnotation2 implements ReflectionAnnotation {
++	public $foo;	
++	protected $value;
++	public function __construct($value = null, $foo = null) {
++		$this->value = $value;
++		$this->foo = $foo;
++	}
++}
++
++<SimpleAnnotation1(array(
++	<SimpleAnnotation2()>,
++	<SimpleAnnotation2("test")>,
++	<SimpleAnnotation2(null, "bar")>
++))>
++class Foo {
++}
++
++$r = new ReflectionClass('Foo');
++var_dump($r->getAnnotations());
++
++?>
++--EXPECTF--
++array(1) {
++  ["SimpleAnnotation1"]=>
++  object(SimpleAnnotation1)#%d (1) {
++    ["value":protected]=>
++    array(3) {
++      [0]=>
++      object(SimpleAnnotation2)#%d (2) {
++        ["foo"]=>
++        NULL
++        ["value":protected]=>
++        NULL
++      }
++      [1]=>
++      object(SimpleAnnotation2)#%d (2) {
++        ["foo"]=>
++        NULL
++        ["value":protected]=>
++        string(4) "test"
++      }
++      [2]=>
++      object(SimpleAnnotation2)#%d (2) {
++        ["foo"]=>
++        string(3) "bar"
++        ["value":protected]=>
++        NULL
++      }
++    }
++  }
++}
+Index: tests/annotations/parser_013.phpt
+===================================================================
+--- tests/annotations/parser_013.phpt	(revision 0)
++++ tests/annotations/parser_013.phpt	(revision 0)
+@@ -0,0 +1,19 @@
++--TEST--
++Multiple Annotations in property test
++--FILE--
++
++<?php
++
++class Foo {
++    <Annotation(array("foo", "bar", "red"))>
++    <AnotherAnnotation>
++    public $bar;
++}
++
++$foo = new Foo();
++
++echo 'OK!';
++
++?>
++--EXPECT--
++OK!
+Index: tests/annotations/parser_023.phpt
+===================================================================
+--- tests/annotations/parser_023.phpt	(revision 0)
++++ tests/annotations/parser_023.phpt	(revision 0)
+@@ -0,0 +1,15 @@
++--TEST--
++Annotation in function using unique value test
++--FILE--
++
++<?php
++
++<Annotation("value")>
++function foo() {
++}
++
++echo 'OK!';
++
++?>
++--EXPECT--
++OK!
+Index: tests/annotations/parser_005.phpt
+===================================================================
+--- tests/annotations/parser_005.phpt	(revision 0)
++++ tests/annotations/parser_005.phpt	(revision 0)
+@@ -0,0 +1,17 @@
++--TEST--
++Annotation in class using array test
++--FILE--
++
++<?php
++
++<Annotation(array("foo", "bar", "red"))>
++class Foo {
++}
++
++$foo = new Foo();
++
++echo 'OK!';
++
++?>
++--EXPECT--
++OK!
+Index: tests/annotations/parser_015.phpt
+===================================================================
+--- tests/annotations/parser_015.phpt	(revision 0)
++++ tests/annotations/parser_015.phpt	(revision 0)
+@@ -0,0 +1,20 @@
++--TEST--
++Annotation in method without value test
++--FILE--
++
++<?php
++
++class Foo {
++    <Annotation>
++    public function bar() {
++        echo 'do nothing';
++    }
++}
++
++$foo = new Foo();
++
++echo 'OK!';
++
++?>
++--EXPECT--
++OK!
+Index: tests/annotations/ReflectionClass_getAnnotations_005.phpt
+===================================================================
+--- tests/annotations/ReflectionClass_getAnnotations_005.phpt	(revision 0)
++++ tests/annotations/ReflectionClass_getAnnotations_005.phpt	(revision 0)
+@@ -0,0 +1,17 @@
++--TEST--
++ReflectionClass::getAnnotations with missing class 
++--SKIPIF--
++<?php extension_loaded('reflection') or die('skip'); ?>
++--FILE--
++<?php
++
++<SimpleAnnotation>
++class Foo {
++}
++
++$r = new ReflectionClass('Foo');
++var_dump($r->getAnnotations());
++
++?>
++--EXPECTF--
++Fatal error: Class 'SimpleAnnotation' not found in %s line %d
+Index: tests/annotations/parser_007.phpt
+===================================================================
+--- tests/annotations/parser_007.phpt	(revision 0)
++++ tests/annotations/parser_007.phpt	(revision 0)
+@@ -0,0 +1,18 @@
++--TEST--
++Annotation in property test
++--FILE--
++
++<?php
++
++class Foo {
++    <Annotation>
++    public $bar;
++}
++
++$foo = new Foo();
++
++echo 'OK!';
++
++?>
++--EXPECT--
++OK!
+Index: tests/annotations/parser_025.phpt
+===================================================================
+--- tests/annotations/parser_025.phpt	(revision 0)
++++ tests/annotations/parser_025.phpt	(revision 0)
+@@ -0,0 +1,15 @@
++--TEST--
++Annotation in function using properties test
++--FILE--
++
++<?php
++
++<Annotation("value", "bar")>
++function foo() {
++}
++
++echo 'OK!';
++
++?>
++--EXPECT--
++OK!
+Index: tests/annotations/ReflectionClass_getAnnotations_007.phpt
+===================================================================
+--- tests/annotations/ReflectionClass_getAnnotations_007.phpt	(revision 0)
++++ tests/annotations/ReflectionClass_getAnnotations_007.phpt	(revision 0)
+@@ -0,0 +1,31 @@
++--TEST--
++ReflectionClass::getAnnotations with constant value 
++--SKIPIF--
++<?php extension_loaded('reflection') or die('skip'); ?>
++--FILE--
++<?php
++
++class SimpleAnnotation implements ReflectionAnnotation {
++	protected $value;
++	public function __construct($value) {
++		$this->value = $value;
++	}
++}
++
++<SimpleAnnotation(Foo::OK)>
++class Foo {
++	const OK = "OK!";
++}
++
++$r = new ReflectionClass('Foo');
++var_dump($r->getAnnotations());
++
++?>
++--EXPECTF--
++array(1) {
++  ["SimpleAnnotation"]=>
++  object(SimpleAnnotation)#%d (1) {
++    ["value":protected]=>
++    string(3) "OK!"
++  }
++}
+Index: tests/annotations/parser_009.phpt
+===================================================================
+--- tests/annotations/parser_009.phpt	(revision 0)
++++ tests/annotations/parser_009.phpt	(revision 0)
+@@ -0,0 +1,18 @@
++--TEST--
++Annotation in property using unique value test
++--FILE--
++
++<?php
++
++class Foo {
++    <Annotation("value")>
++    public $bar;
++}
++
++$foo = new Foo();
++
++echo 'OK!';
++
++?>
++--EXPECT--
++OK!
+Index: tests/annotations/parser_027.phpt
+===================================================================
+--- tests/annotations/parser_027.phpt	(revision 0)
++++ tests/annotations/parser_027.phpt	(revision 0)
+@@ -0,0 +1,16 @@
++--TEST--
++Multiple Annotations in function test
++--FILE--
++
++<?php
++
++<Annotation(array("foo", "bar", "red"))>
++<AnotherAnnotation>
++function foo() {
++}
++
++echo 'OK!';
++
++?>
++--EXPECT--
++OK!
+Index: tests/annotations/parser_019.phpt
+===================================================================
+--- tests/annotations/parser_019.phpt	(revision 0)
++++ tests/annotations/parser_019.phpt	(revision 0)
+@@ -0,0 +1,20 @@
++--TEST--
++Annotation in method using array test
++--FILE--
++
++<?php
++
++class Foo {
++    <Annotation(array("foo", "bar", "red"))>
++    public function bar() {
++        echo 'do nothing';
++    }
++}
++
++$foo = new Foo();
++
++echo 'OK!';
++
++?>
++--EXPECT--
++OK!
+Index: tests/annotations/ReflectionClass_hasAnnotation_001.phpt
+===================================================================
+--- tests/annotations/ReflectionClass_hasAnnotation_001.phpt	(revision 0)
++++ tests/annotations/ReflectionClass_hasAnnotation_001.phpt	(revision 0)
+@@ -0,0 +1,20 @@
++--TEST--
++ReflectionClass::hasAnnotation with simple annotation
++--SKIPIF--
++<?php extension_loaded('reflection') or die('skip'); ?>
++--FILE--
++<?php
++
++class SimpleAnnotation implements ReflectionAnnotation {
++}
++
++<SimpleAnnotation>
++class Foo {
++}
++
++$r = new ReflectionClass('Foo');
++var_dump($r->hasAnnotation('SimpleAnnotation'));
++
++?>
++--EXPECTF--
++bool(true)
+Index: tests/annotations/ReflectionParameter_getAnnotations_001.phpt
+===================================================================
+--- tests/annotations/ReflectionParameter_getAnnotations_001.phpt	(revision 0)
++++ tests/annotations/ReflectionParameter_getAnnotations_001.phpt	(revision 0)
+@@ -0,0 +1,26 @@
++--TEST--
++ReflectionParameter::getAnnotations with simple annotation
++--SKIPIF--
++<?php extension_loaded('reflection') or die('skip'); ?>
++--FILE--
++<?php
++
++class SimpleAnnotation implements ReflectionAnnotation {
++}
++
++function foo(<SimpleAnnotation> $bar)
++{
++}
++
++$r = new ReflectionFunction('foo');
++foreach ($r->getParameters() as $argument) {
++	var_dump($argument->getAnnotations());
++}
++
++?>
++--EXPECTF--
++array(1) {
++  ["SimpleAnnotation"]=>
++  object(SimpleAnnotation)#%d (0) {
++  }
++}
+Index: tests/annotations/ReflectionMethod_getAnnotations_002.phpt
+===================================================================
+--- tests/annotations/ReflectionMethod_getAnnotations_002.phpt	(revision 0)
++++ tests/annotations/ReflectionMethod_getAnnotations_002.phpt	(revision 0)
+@@ -0,0 +1,18 @@
++--TEST--
++ReflectionMethod::getAnnotations with no annotation 
++--SKIPIF--
++<?php extension_loaded('reflection') or die('skip'); ?>
++--FILE--
++<?php
++
++class Foo {
++	public function bar() {}
++}
++
++$r = new ReflectionMethod('Foo','bar');
++var_dump($r->getAnnotations());
++
++?>
++--EXPECTF--
++array(0) {
++}
+Index: tests/annotations/ReflectionParameter_getAnnotations_003.phpt
+===================================================================
+--- tests/annotations/ReflectionParameter_getAnnotations_003.phpt	(revision 0)
++++ tests/annotations/ReflectionParameter_getAnnotations_003.phpt	(revision 0)
+@@ -0,0 +1,65 @@
++--TEST--
++ReflectionMethod::getAnnotations with complex annotations
++--SKIPIF--
++<?php extension_loaded('reflection') or die('skip'); ?>
++--FILE--
++<?php
++
++class SimpleAnnotation1 implements ReflectionAnnotation {
++    protected $value;
++    public function __construct($value) {
++        $this->value = $value;
++    }
++}
++class SimpleAnnotation2 implements ReflectionAnnotation {
++    public $foo;
++    protected $value;
++    public function __construct($value = null, $foo = null) {
++        $this->value = $value;
++        $this->foo = $foo;
++    }
++}
++
++function foo(<SimpleAnnotation1(array(
++		<SimpleAnnotation2()>,
++		<SimpleAnnotation2("test")>,
++		<SimpleAnnotation2(null, "bar")>
++	))> $bar) 
++{
++}
++
++$r = new ReflectionFunction('foo');
++foreach ($r->getParameters() as $argument) {
++	    var_dump($argument->getAnnotations());
++} 
++?>
++--EXPECTF--
++array(1) {
++  ["SimpleAnnotation1"]=>
++  object(SimpleAnnotation1)#%d (1) {
++    ["value":protected]=>
++    array(3) {
++      [0]=>
++      object(SimpleAnnotation2)#%d (2) {
++        ["foo"]=>
++        NULL
++        ["value":protected]=>
++        NULL
++      }
++      [1]=>
++      object(SimpleAnnotation2)#%d (2) {
++        ["foo"]=>
++        NULL
++        ["value":protected]=>
++        string(4) "test"
++      }
++      [2]=>
++      object(SimpleAnnotation2)#%d (2) {
++        ["foo"]=>
++        string(3) "bar"
++        ["value":protected]=>
++        NULL
++      }
++    }
++  }
++}
+Index: tests/annotations/ReflectionClass_getAnnotation_001.phpt
+===================================================================
+--- tests/annotations/ReflectionClass_getAnnotation_001.phpt	(revision 0)
++++ tests/annotations/ReflectionClass_getAnnotation_001.phpt	(revision 0)
+@@ -0,0 +1,21 @@
++--TEST--
++ReflectionClass::getAnnotation with simple annotation
++--SKIPIF--
++<?php extension_loaded('reflection') or die('skip'); ?>
++--FILE--
++<?php
++
++class SimpleAnnotation implements ReflectionAnnotation {
++}
++
++<SimpleAnnotation>
++class Foo {
++}
++
++$r = new ReflectionClass('Foo');
++var_dump($r->getAnnotation('SimpleAnnotation'));
++
++?>
++--EXPECTF--
++object(SimpleAnnotation)#2 (0) {
++}
+Index: tests/annotations/ReflectionClass_getAnnotation_003.phpt
+===================================================================
+--- tests/annotations/ReflectionClass_getAnnotation_003.phpt	(revision 0)
++++ tests/annotations/ReflectionClass_getAnnotation_003.phpt	(revision 0)
+@@ -0,0 +1,65 @@
++--TEST--
++ReflectionClass::getAnnotation with complex annotations
++--SKIPIF--
++<?php extension_loaded('reflection') or die('skip'); ?>
++--FILE--
++<?php
++
++class SimpleAnnotation1 implements ReflectionAnnotation {
++	protected $value;
++
++	public function __construct($value)
++	{
++		$this->value = $value;
++	}
++}
++class SimpleAnnotation2 implements ReflectionAnnotation {
++	public $foo;	
++	protected $value;
++
++	public function __construct($value = null, $foo = null)
++	{
++		$this->value = $value;
++		$this->foo = $foo;
++	}
++}
++
++<SimpleAnnotation1(array(
++	<SimpleAnnotation2()>,
++	<SimpleAnnotation2("test")>,
++	<SimpleAnnotation2(null, "bar")>
++))>
++class Foo {
++}
++
++$r = new ReflectionClass('Foo');
++var_dump($r->getAnnotation('SimpleAnnotation1'));
++
++?>
++--EXPECTF--
++object(SimpleAnnotation1)#%d (1) {
++  ["value":protected]=>
++  array(3) {
++    [0]=>
++    object(SimpleAnnotation2)#%d (2) {
++      ["foo"]=>
++      NULL
++      ["value":protected]=>
++      NULL
++    }
++    [1]=>
++    object(SimpleAnnotation2)#%d (2) {
++      ["foo"]=>
++      NULL
++      ["value":protected]=>
++      string(4) "test"
++    }
++    [2]=>
++    object(SimpleAnnotation2)#%d (2) {
++      ["foo"]=>
++      string(3) "bar"
++      ["value":protected]=>
++      NULL
++    }
++  }
++}
+Index: tests/annotations/ReflectionProperty_getAnnotations_002.phpt
+===================================================================
+--- tests/annotations/ReflectionProperty_getAnnotations_002.phpt	(revision 0)
++++ tests/annotations/ReflectionProperty_getAnnotations_002.phpt	(revision 0)
+@@ -0,0 +1,18 @@
++--TEST--
++ReflectionProperty::getAnnotations with no annotation 
++--SKIPIF--
++<?php extension_loaded('reflection') or die('skip'); ?>
++--FILE--
++<?php
++
++class Foo {
++	public $bar;
++}
++
++$r = new ReflectionProperty('Foo','bar');
++var_dump($r->getAnnotations());
++
++?>
++--EXPECTF--
++array(0) {
++}
+Index: tests/annotations/ReflectionFunction_getAnnotations_002.phpt
+===================================================================
+--- tests/annotations/ReflectionFunction_getAnnotations_002.phpt	(revision 0)
++++ tests/annotations/ReflectionFunction_getAnnotations_002.phpt	(revision 0)
+@@ -0,0 +1,16 @@
++--TEST--
++ReflectionFunction::getAnnotations with no annotation 
++--SKIPIF--
++<?php extension_loaded('reflection') or die('skip'); ?>
++--FILE--
++<?php
++
++function foo() {}
++
++$r = new ReflectionFunction('Foo');
++var_dump($r->getAnnotations());
++
++?>
++--EXPECTF--
++array(0) {
++}
+Index: tests/annotations/namespace_001.phpt
+===================================================================
+--- tests/annotations/namespace_001.phpt	(revision 0)
++++ tests/annotations/namespace_001.phpt	(revision 0)
+@@ -0,0 +1,25 @@
++--TEST--
++Test namespace usage within annotations
++--SKIPIF--
++<?php extension_loaded('reflection') or die('skip'); ?>
++--FILE--
++<?php
++
++use Foo\Bar as Foobar;
++
++require('namespace_001.inc');
++
++<Foobar>
++class Foo {
++}
++
++$r = new ReflectionClass('Foo');
++var_dump($r->getAnnotations());
++
++?>
++--EXPECTF--
++array(1) {
++  ["Foo\Bar"]=>
++  object(Foo\Bar)#2 (0) {
++  }
++}
+Index: tests/annotations/parser_002.phpt
+===================================================================
+--- tests/annotations/parser_002.phpt	(revision 0)
++++ tests/annotations/parser_002.phpt	(revision 0)
+@@ -0,0 +1,17 @@
++--TEST--
++Annotation in class using unique value test
++--FILE--
++
++<?php
++
++<Annotation("value")>
++class Foo {
++}
++
++$foo = new Foo();
++
++echo 'OK!';
++
++?>
++--EXPECT--
++OK!
+Index: tests/annotations/parser_020.phpt
+===================================================================
+--- tests/annotations/parser_020.phpt	(revision 0)
++++ tests/annotations/parser_020.phpt	(revision 0)
+@@ -0,0 +1,21 @@
++--TEST--
++Multiple Annotations in method test
++--FILE--
++
++<?php
++
++class Foo {
++    <Annotation(array("foo", "bar", "red"))>
++    <AnotherAnnotation>
++    public function bar() {
++        echo 'do nothing';
++    }
++}
++
++$foo = new Foo();
++
++echo 'OK!';
++
++?>
++--EXPECT--
++OK!
+Index: tests/annotations/ReflectionClass_getAnnotations_002.phpt
+===================================================================
+--- tests/annotations/ReflectionClass_getAnnotations_002.phpt	(revision 0)
++++ tests/annotations/ReflectionClass_getAnnotations_002.phpt	(revision 0)
+@@ -0,0 +1,17 @@
++--TEST--
++ReflectionClass::getAnnotations with no annotation 
++--SKIPIF--
++<?php extension_loaded('reflection') or die('skip'); ?>
++--FILE--
++<?php
++
++class Foo {
++}
++
++$r = new ReflectionClass('Foo');
++var_dump($r->getAnnotations());
++
++?>
++--EXPECTF--
++array(0) {
++}
+Index: tests/annotations/parser_012.phpt
+===================================================================
+--- tests/annotations/parser_012.phpt	(revision 0)
++++ tests/annotations/parser_012.phpt	(revision 0)
+@@ -0,0 +1,18 @@
++--TEST--
++Annotation in property using array test
++--FILE--
++
++<?php
++
++class Foo {
++    <Annotation(array("foo", "bar", "red"))>
++    public $bar;
++}
++
++$foo = new Foo();
++
++echo 'OK!';
++
++?>
++--EXPECT--
++OK!
+Index: tests/annotations/parser_030.phpt
+===================================================================
+--- tests/annotations/parser_030.phpt	(revision 0)
++++ tests/annotations/parser_030.phpt	(revision 0)
+@@ -0,0 +1,21 @@
++--TEST--
++Annotations on parameters
++--FILE--
++
++<?php
++
++function foo(<Annotation("value")> $bar)
++{
++}
++
++class foo {
++	public function foo(<Annotations()> $bar)
++	{
++	}
++}
++
++echo 'OK!';
++
++?>
++--EXPECTF--
++OK!
+Index: tests/annotations/parser_004.phpt
+===================================================================
+--- tests/annotations/parser_004.phpt	(revision 0)
++++ tests/annotations/parser_004.phpt	(revision 0)
+@@ -0,0 +1,17 @@
++--TEST--
++Annotation in class using properties test
++--FILE--
++
++<?php
++
++<Annotation("value", "bar")>
++class Foo {
++}
++
++$foo = new Foo();
++
++echo 'OK!';
++
++?>
++--EXPECT--
++OK!
+Index: tests/annotations/parser_022.phpt
+===================================================================
+--- tests/annotations/parser_022.phpt	(revision 0)
++++ tests/annotations/parser_022.phpt	(revision 0)
+@@ -0,0 +1,15 @@
++--TEST--
++Annotation in function without value test
++--FILE--
++
++<?php
++
++<Annotation>
++function foo() {
++}
++
++echo 'OK!';
++
++?>
++--EXPECT--
++OK!
+Index: tests/annotations/parser_014.phpt
+===================================================================
+--- tests/annotations/parser_014.phpt	(revision 0)
++++ tests/annotations/parser_014.phpt	(revision 0)
+@@ -0,0 +1,20 @@
++--TEST--
++Annotation in method test
++--FILE--
++
++<?php
++
++class Foo {
++    <Annotation>
++    public function bar() {
++        echo 'do nothing';
++    }
++}
++
++$foo = new Foo();
++
++echo 'OK!';
++
++?>
++--EXPECT--
++OK!
+Index: tests/annotations/parser_006.phpt
+===================================================================
+--- tests/annotations/parser_006.phpt	(revision 0)
++++ tests/annotations/parser_006.phpt	(revision 0)
+@@ -0,0 +1,18 @@
++--TEST--
++Multiple Annotations in class test
++--FILE--
++
++<?php
++
++<Annotation(array("foo", "bar", "red"))>
++<AnotherAnnotation>
++class Foo {
++}
++
++$foo = new Foo();
++
++echo 'OK!';
++
++?>
++--EXPECT--
++OK!
+Index: tests/annotations/parser_016.phpt
+===================================================================
+--- tests/annotations/parser_016.phpt	(revision 0)
++++ tests/annotations/parser_016.phpt	(revision 0)
+@@ -0,0 +1,20 @@
++--TEST--
++Annotation in method using unique value test
++--FILE--
++
++<?php
++
++class Foo {
++    <Annotation("value")>
++    public function bar() {
++        echo 'do nothing';
++    }
++}
++
++$foo = new Foo();
++
++echo 'OK!';
++
++?>
++--EXPECT--
++OK!
+Index: tests/annotations/ReflectionClass_getAnnotations_006.phpt
+===================================================================
+--- tests/annotations/ReflectionClass_getAnnotations_006.phpt	(revision 0)
++++ tests/annotations/ReflectionClass_getAnnotations_006.phpt	(revision 0)
+@@ -0,0 +1,19 @@
++--TEST--
++ReflectionClass::getAnnotations with bad class 
++--SKIPIF--
++<?php extension_loaded('reflection') or die('skip'); ?>
++--FILE--
++<?php
++
++class SimpleAnnotation {}
++
++<SimpleAnnotation>
++class Foo {
++}
++
++$r = new ReflectionClass('Foo');
++var_dump($r->getAnnotations());
++
++?>
++--EXPECTF--
++Fatal error: ReflectionClass::getAnnotations(): 'SimpleAnnotation' must implement 'ReflectionAnnotation' to act as an annotation in %s on line %d 
+Index: tests/annotations/parser_008.phpt
+===================================================================
+--- tests/annotations/parser_008.phpt	(revision 0)
++++ tests/annotations/parser_008.phpt	(revision 0)
+@@ -0,0 +1,18 @@
++--TEST--
++Annotation in property without value test
++--FILE--
++
++<?php
++
++class Foo {
++    <Annotation>
++    public $bar;
++}
++
++$foo = new Foo();
++
++echo 'OK!';
++
++?>
++--EXPECT--
++OK!
+Index: tests/annotations/parser_026.phpt
+===================================================================
+--- tests/annotations/parser_026.phpt	(revision 0)
++++ tests/annotations/parser_026.phpt	(revision 0)
+@@ -0,0 +1,15 @@
++--TEST--
++Annotation in function using array test
++--FILE--
++
++<?php
++
++<Annotation(array("foo", "bar", "red"))>
++function foo() {
++}
++
++echo 'OK!';
++
++?>
++--EXPECT--
++OK!
+Index: tests/annotations/parser_018.phpt
+===================================================================
+--- tests/annotations/parser_018.phpt	(revision 0)
++++ tests/annotations/parser_018.phpt	(revision 0)
+@@ -0,0 +1,20 @@
++--TEST--
++Annotation in method using properties test
++--FILE--
++
++<?php
++
++class Foo {
++    <Annotation("value", "bar")>
++    public function bar() {
++        echo 'do nothing';
++    }
++}
++
++$foo = new Foo();
++
++echo 'OK!';
++
++?>
++--EXPECT--
++OK!
+Index: tests/annotations/parser_028.phpt
+===================================================================
+--- tests/annotations/parser_028.phpt	(revision 0)
++++ tests/annotations/parser_028.phpt	(revision 0)
+@@ -0,0 +1,16 @@
++--TEST--
++Duplicated annotation
++--FILE--
++
++<?php
++
++<Annotation("value", "bar")>
++<Annotation("value", "bar")>
++class foo() {
++}
++
++echo 'OK!';
++
++?>
++--EXPECTF--
++Fatal error: Cannot redeclare annotation 'Annotation' in %s on line %d
+Index: tests/annotations/ReflectionClass_hasAnnotation_002.phpt
+===================================================================
+--- tests/annotations/ReflectionClass_hasAnnotation_002.phpt	(revision 0)
++++ tests/annotations/ReflectionClass_hasAnnotation_002.phpt	(revision 0)
+@@ -0,0 +1,16 @@
++--TEST--
++ReflectionClass::hasAnnotation with no annotation 
++--SKIPIF--
++<?php extension_loaded('reflection') or die('skip'); ?>
++--FILE--
++<?php
++
++class Foo {
++}
++
++$r = new ReflectionClass('Foo');
++var_dump($r->hasAnnotation('SimpleAnnotation'));
++
++?>
++--EXPECTF--
++bool(false)
+Index: tests/annotations/ReflectionMethod_getAnnotations_001.phpt
+===================================================================
+--- tests/annotations/ReflectionMethod_getAnnotations_001.phpt	(revision 0)
++++ tests/annotations/ReflectionMethod_getAnnotations_001.phpt	(revision 0)
+@@ -0,0 +1,25 @@
++--TEST--
++ReflectionMethod::getAnnotations with simple annotation
++--SKIPIF--
++<?php extension_loaded('reflection') or die('skip'); ?>
++--FILE--
++<?php
++
++class SimpleAnnotation implements ReflectionAnnotation {
++}
++
++class Foo {
++	<SimpleAnnotation>
++	public function bar() {}
++}
++
++$r = new ReflectionMethod('Foo','bar');
++var_dump($r->getAnnotations());
++
++?>
++--EXPECTF--
++array(1) {
++  ["SimpleAnnotation"]=>
++  object(SimpleAnnotation)#%d (0) {
++  }
++}
+Index: tests/annotations/ReflectionParameter_getAnnotations_002.phpt
+===================================================================
+--- tests/annotations/ReflectionParameter_getAnnotations_002.phpt	(revision 0)
++++ tests/annotations/ReflectionParameter_getAnnotations_002.phpt	(revision 0)
+@@ -0,0 +1,19 @@
++--TEST--
++ReflectionMethod::getAnnotations with no annotation 
++--SKIPIF--
++<?php extension_loaded('reflection') or die('skip'); ?>
++--FILE--
++<?php
++
++function foo($bar)
++{
++}
++
++$r = new ReflectionFunction('foo');
++foreach ($r->getParameters() as $argument) {
++	var_dump($argument->getAnnotations());
++}
++?>
++--EXPECTF--
++array(0) {
++}
+Index: tests/annotations/ReflectionMethod_getAnnotations_003.phpt
+===================================================================
+--- tests/annotations/ReflectionMethod_getAnnotations_003.phpt	(revision 0)
++++ tests/annotations/ReflectionMethod_getAnnotations_003.phpt	(revision 0)
+@@ -0,0 +1,67 @@
++--TEST--
++ReflectionMethod::getAnnotations with complex annotations
++--SKIPIF--
++<?php extension_loaded('reflection') or die('skip'); ?>
++--FILE--
++<?php
++
++class SimpleAnnotation1 implements ReflectionAnnotation {
++	protected $value;
++	public function __construct($value) {
++		$this->value = $value;
++	}
++}
++class SimpleAnnotation2 implements ReflectionAnnotation {
++	public $foo;	
++	protected $value;
++	public function __construct($value = null, $foo = null) {
++		$this->value = $value;
++		$this->foo = $foo;
++	}
++}
++
++class Foo {
++	<SimpleAnnotation1(array(
++		<SimpleAnnotation2()>,
++		<SimpleAnnotation2("test")>,
++		<SimpleAnnotation2(null, "bar")>
++	))>
++	public function bar() {}
++}
++
++$foo = new Foo();
++
++$r = new ReflectionMethod('Foo','bar');
++var_dump($r->getAnnotations());
++
++?>
++--EXPECTF--
++array(1) {
++  ["SimpleAnnotation1"]=>
++  object(SimpleAnnotation1)#%d (1) {
++    ["value":protected]=>
++    array(3) {
++      [0]=>
++      object(SimpleAnnotation2)#%d (2) {
++        ["foo"]=>
++        NULL
++        ["value":protected]=>
++        NULL
++      }
++      [1]=>
++      object(SimpleAnnotation2)#%d (2) {
++        ["foo"]=>
++        NULL
++        ["value":protected]=>
++        string(4) "test"
++      }
++      [2]=>
++      object(SimpleAnnotation2)#%d (2) {
++        ["foo"]=>
++        string(3) "bar"
++        ["value":protected]=>
++        NULL
++      }
++    }
++  }
++}
+Index: tests/annotations/ReflectionClass_getAnnotation_002.phpt
+===================================================================
+--- tests/annotations/ReflectionClass_getAnnotation_002.phpt	(revision 0)
++++ tests/annotations/ReflectionClass_getAnnotation_002.phpt	(revision 0)
+@@ -0,0 +1,16 @@
++--TEST--
++ReflectionClass::getAnnotation with no annotation 
++--SKIPIF--
++<?php extension_loaded('reflection') or die('skip'); ?>
++--FILE--
++<?php
++
++class Foo {
++}
++
++$r = new ReflectionClass('Foo');
++var_dump($r->getAnnotation('SimpleAnnotation'));
++
++?>
++--EXPECTF--
++NULL
+Index: tests/annotations/ReflectionProperty_getAnnotations_001.phpt
+===================================================================
+--- tests/annotations/ReflectionProperty_getAnnotations_001.phpt	(revision 0)
++++ tests/annotations/ReflectionProperty_getAnnotations_001.phpt	(revision 0)
+@@ -0,0 +1,25 @@
++--TEST--
++ReflectionProperty::getAnnotations with simple annotation
++--SKIPIF--
++<?php extension_loaded('reflection') or die('skip'); ?>
++--FILE--
++<?php
++
++class SimpleAnnotation implements ReflectionAnnotation {
++}
++
++class Foo {
++	<SimpleAnnotation>
++	public $bar;
++}
++
++$r = new ReflectionProperty('Foo','bar');
++var_dump($r->getAnnotations());
++
++?>
++--EXPECTF--
++array(1) {
++  ["SimpleAnnotation"]=>
++  object(SimpleAnnotation)#%d (0) {
++  }
++}
+Index: tests/annotations/ReflectionFunction_getAnnotations_001.phpt
+===================================================================
+--- tests/annotations/ReflectionFunction_getAnnotations_001.phpt	(revision 0)
++++ tests/annotations/ReflectionFunction_getAnnotations_001.phpt	(revision 0)
+@@ -0,0 +1,23 @@
++--TEST--
++ReflectionFunction::getAnnotations with simple annotation
++--SKIPIF--
++<?php extension_loaded('reflection') or die('skip'); ?>
++--FILE--
++<?php
++
++class SimpleAnnotation implements ReflectionAnnotation {
++}
++
++<SimpleAnnotation>
++function foo() {}
++
++$r = new ReflectionFunction('Foo');
++var_dump($r->getAnnotations());
++
++?>
++--EXPECTF--
++array(1) {
++  ["SimpleAnnotation"]=>
++  object(SimpleAnnotation)#%d (0) {
++  }
++}
+Index: tests/annotations/ReflectionProperty_getAnnotations_003.phpt
+===================================================================
+--- tests/annotations/ReflectionProperty_getAnnotations_003.phpt	(revision 0)
++++ tests/annotations/ReflectionProperty_getAnnotations_003.phpt	(revision 0)
+@@ -0,0 +1,65 @@
++--TEST--
++ReflectionProperty::getAnnotations with complex annotations
++--SKIPIF--
++<?php extension_loaded('reflection') or die('skip'); ?>
++--FILE--
++<?php
++
++class SimpleAnnotation1 implements ReflectionAnnotation {
++    protected $value;
++    public function __construct($value) {
++        $this->value = $value;
++    }
++}
++class SimpleAnnotation2 implements ReflectionAnnotation {
++    public $foo;
++    protected $value;
++    public function __construct($value = null, $foo = null) {
++        $this->value = $value;
++        $this->foo = $foo;
++    }
++}
++
++class Foo {
++	<SimpleAnnotation1(array(
++		<SimpleAnnotation2()>,
++		<SimpleAnnotation2("test")>,
++		<SimpleAnnotation2(null, "bar")>
++	))>
++	public $bar;
++}
++
++$r = new ReflectionProperty('Foo','bar');
++var_dump($r->getAnnotations());
++
++?>
++--EXPECTF--
++array(1) {
++  ["SimpleAnnotation1"]=>
++  object(SimpleAnnotation1)#%d (1) {
++    ["value":protected]=>
++    array(3) {
++      [0]=>
++      object(SimpleAnnotation2)#%d (2) {
++        ["foo"]=>
++        NULL
++        ["value":protected]=>
++        NULL
++      }
++      [1]=>
++      object(SimpleAnnotation2)#%d (2) {
++        ["foo"]=>
++        NULL
++        ["value":protected]=>
++        string(4) "test"
++      }
++      [2]=>
++      object(SimpleAnnotation2)#%d (2) {
++        ["foo"]=>
++        string(3) "bar"
++        ["value":protected]=>
++        NULL
++      }
++    }
++  }
++}
+Index: tests/annotations/ReflectionFunction_getAnnotations_003.phpt
+===================================================================
+--- tests/annotations/ReflectionFunction_getAnnotations_003.phpt	(revision 0)
++++ tests/annotations/ReflectionFunction_getAnnotations_003.phpt	(revision 0)
+@@ -0,0 +1,63 @@
++--TEST--
++ReflectionFunction::getAnnotations with complex annotations
++--SKIPIF--
++<?php extension_loaded('reflection') or die('skip'); ?>
++--FILE--
++<?php
++
++class SimpleAnnotation1 implements ReflectionAnnotation {
++	protected $value;
++	public function __construct($value) {
++		$this->value = $value;
++	}
++}
++class SimpleAnnotation2 implements ReflectionAnnotation {
++	public $foo;	
++	protected $value;
++	public function __construct($value = null, $foo = null) {
++		$this->value = $value;
++		$this->foo = $foo;
++	}
++}
++
++<SimpleAnnotation1(array(
++	<SimpleAnnotation2()>,
++	<SimpleAnnotation2("test")>,
++	<SimpleAnnotation2(null, "bar")>
++))>
++function foo() {}
++
++$r = new ReflectionFunction('Foo');
++var_dump($r->getAnnotations());
++
++?>
++--EXPECTF--
++array(1) {
++  ["SimpleAnnotation1"]=>
++  object(SimpleAnnotation1)#%d (1) {
++    ["value":protected]=>
++    array(3) {
++      [0]=>
++      object(SimpleAnnotation2)#%d (2) {
++        ["foo"]=>
++        NULL
++        ["value":protected]=>
++        NULL
++      }
++      [1]=>
++      object(SimpleAnnotation2)#%d (2) {
++        ["foo"]=>
++        NULL
++        ["value":protected]=>
++        string(4) "test"
++      }
++      [2]=>
++      object(SimpleAnnotation2)#%d (2) {
++        ["foo"]=>
++        string(3) "bar"
++        ["value":protected]=>
++        NULL
++      }
++    }
++  }
++}
+Index: tests/annotations/ReflectionProperty_getAnnotations_005.phpt
+===================================================================
+--- tests/annotations/ReflectionProperty_getAnnotations_005.phpt	(revision 0)
++++ tests/annotations/ReflectionProperty_getAnnotations_005.phpt	(revision 0)
+@@ -0,0 +1,25 @@
++--TEST--
++ReflectionProperty::getAnnotations with overrided property 
++--SKIPIF--
++<?php extension_loaded('reflection') or die('skip'); ?>
++--FILE--
++<?php
++
++class SimpleAnnotation implements ReflectionAnnotation {
++}
++
++abstract class Base {
++	<SimpleAnnotation>
++	public $bar;
++}
++class Foo extends Base {
++	public $bar;
++}
++
++$r = new ReflectionProperty('Foo','bar');
++var_dump($r->getAnnotations());
++
++?>
++--EXPECTF--
++array(0) {
++}
